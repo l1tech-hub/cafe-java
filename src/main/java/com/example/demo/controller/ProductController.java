@@ -1,26 +1,35 @@
 package com.example.demo.controller;
+
+import com.example.demo.dto.ProductDto;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 import com.example.demo.entity.Product;
-import com.example.demo.repository.ProductRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.service.ProductService;
 
 @RestController
-public class TestController {
+@RequestMapping("/products")
+public class ProductController {
 
-    private final ProductRepository repo;
+    private final ProductService service;
 
-    public TestController(ProductRepository repo) {
-        this.repo = repo;
+    public ProductController(ProductService service) {
+        this.service = service;
     }
 
-    @GetMapping("/test")
-    public String test() {
-        Product p = new Product();
-        p.setName("Test");
-        p.setPrice(10.0);
+    @GetMapping("/add")
+    public Product add(
+            @RequestParam String name,
+            @RequestParam Double price) {
+        return service.add(name, price);
+    }
 
-        repo.save(p);
+    @GetMapping(value = "/{id}")
+    public ProductDto getById(@PathVariable Long id) {
+        return service.getById(id);
+    }
 
-        return "Saved!";
+    @GetMapping
+    public List<ProductDto> getAll() {
+        return service.getAll();
     }
 }
