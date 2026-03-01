@@ -1,21 +1,35 @@
 package com.example.demo.dto;
 
+/**
+ * Передача данных о продукте между клиентом и сервером.
+ */
 public class ProductDto {
-    private Long id;
-    private String name;
-    private Double price;
 
-    public ProductDto() {}
+  private Long id;
+  private String name;
+  private Double price;
 
-    public ProductDto(Long id, String name, Double price) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-    }
+  public ProductDto() {
+  }
 
-    public Long getId() { return id; }
+  /**
+   * Конструктор с параметрами.
+   */
+  public ProductDto(Long id, String name, Double price) {
+    this.id = id;
+    this.name = name;
+    this.price = price;
+  }
 
-    public String getName() { return name; }
+  public Long getId() {
+    return id;
+  }
 
-    public Double getPrice() { return price; }
+  public String getName() {
+    return name;
+  }
+
+  public Double getPrice() {
+    return price;
+  }
 }
