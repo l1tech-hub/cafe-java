@@ -6,8 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class CafeApplicationTests {
 
+
   @Test
   void contextLoads() {
+    //Этот метод пуст, так как в программе не используются тесты.
   }
 
 }
