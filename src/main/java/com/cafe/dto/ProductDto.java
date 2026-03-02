@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.cafe.dto;
 
 /**
  * Передача данных о продукте между клиентом и сервером.

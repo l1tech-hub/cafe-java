@@ -1,6 +1,6 @@
-package com.example.demo;
+package com.cafe;
 
-import com.example.demo.service.ProductService;
+import com.cafe.service.ProductService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Bean;
  * Точка входа в программу.
  */
 @SpringBootApplication
-public class DemoApplication {
+public class CafeApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(DemoApplication.class, args);
+    SpringApplication.run(CafeApplication.class, args);
   }
 
   @Bean

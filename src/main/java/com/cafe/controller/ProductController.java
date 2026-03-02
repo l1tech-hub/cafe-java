@@ -1,18 +1,20 @@
-package com.example.demo.controller;
+package com.cafe.controller;
 
-import com.example.demo.dto.ProductDto;
-import com.example.demo.entity.Product;
-import com.example.demo.service.ProductService;
+import com.cafe.dto.ProductDto;
+import com.cafe.entity.Product;
+import com.cafe.service.ProductService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
 /**
- * REST контролёр для продуктов.
+ * REST для продуктов.
  * Даёт endpoints для CRUD.
  */
 @RestController
@@ -25,11 +27,9 @@ public class ProductController {
     this.service = service;
   }
 
-  @GetMapping("/add")
-  public Product add(
-      @RequestParam String name,
-      @RequestParam Double price) {
-    return service.add(name, price);
+  @PostMapping
+  public Product add(@RequestBody ProductDto dto) {
+    return service.add(dto.getName(), dto.getPrice());
   }
 
   @GetMapping(value = "/{id}")
@@ -40,5 +40,10 @@ public class ProductController {
   @GetMapping
   public List<ProductDto> getAll() {
     return service.getAll();
+  }
+
+  @GetMapping("/search")
+  public List<Product> searchByName(@RequestParam String name) {
+    return service.findByName(name);
   }
 }

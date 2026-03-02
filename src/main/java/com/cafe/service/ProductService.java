@@ -1,15 +1,14 @@
-package com.example.demo.service;
+package com.cafe.service;
 
-import com.example.demo.dto.ProductDto;
-import com.example.demo.entity.Product;
-import com.example.demo.mapper.ProductMapper;
-import com.example.demo.repository.ProductRepository;
+import com.cafe.dto.ProductDto;
+import com.cafe.entity.Product;
+import com.cafe.mapper.ProductMapper;
+import com.cafe.repository.ProductRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
- * Service layer for managing products.
- * Contains business logic related to product operations.
+ * Сервис для операций с продуктами.
  */
 @Service
 public class ProductService {
@@ -38,6 +37,10 @@ public class ProductService {
         .stream()
         .map(ProductMapper::toDto)
         .toList();
+  }
+
+  public List<Product> findByName(String name) {
+    return repository.findByName(name);
   }
 }
 

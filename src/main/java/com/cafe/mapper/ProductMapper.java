@@ -1,13 +1,15 @@
-package com.example.demo.mapper;
+package com.cafe.mapper;
 
-import com.example.demo.dto.ProductDto;
-import com.example.demo.entity.Product;
+import com.cafe.dto.ProductDto;
+import com.cafe.entity.Product;
 
 
 /**
  * Класс для преобразования Product в ProductDto.
  */
 public class ProductMapper {
+
+  private ProductMapper() {}
 
   /**
    * Метод для преобразования Product в ProductDto.
