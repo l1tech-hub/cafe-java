@@ -1,5 +1,7 @@
 # cafe-java
 
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=l1tech-hub_cafe-java&token=7ee5306ccb7aff307d004d4a1e9b14dba0bd02c0)](https://sonarcloud.io/summary/new_code?id=l1tech-hub_cafe-java)
+
 ## Описание проекта:
 Система управления приготовлением блюд в кафе — это backend-приложение на Java Spring Boot для управления процессом приготовления блюд и складом ингредиентов в кафе.
 Система ориентирована на учёт рецептов, ингредиентов, партий поставок и контроль сроков годности.
