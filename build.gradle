@@ -22,10 +22,12 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'
+
+    //runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 
@@ -37,4 +39,6 @@ checkstyle {
     toolVersion = '10.17.0'
 
     configFile = file('config/checkstyle/checkstyle.xml')
+    ignoreFailures = false // Ensure the build fails on errors
+    maxWarnings = 0 // Set to 0 to fail on any warning
 }

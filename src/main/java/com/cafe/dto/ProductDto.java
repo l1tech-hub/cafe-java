@@ -1,24 +1,18 @@
 package com.cafe.dto;
 
-/**
- * Передача данных о продукте между клиентом и сервером.
- */
 public class ProductDto {
 
   private Long id;
   private String name;
-  private Double price;
+  boolean state;
 
   public ProductDto() {
   }
 
-  /**
-   * Конструктор с параметрами.
-   */
-  public ProductDto(Long id, String name, Double price) {
+  public ProductDto(Long id, String name, boolean state) {
     this.id = id;
     this.name = name;
-    this.price = price;
+    this.state = state;
   }
 
   public Long getId() {
@@ -29,7 +23,19 @@ public class ProductDto {
     return name;
   }
 
-  public Double getPrice() {
-    return price;
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public boolean getState() {
+    return state;
+  }
+
+  public void setState(boolean state) {
+    this.state = state;
   }
 }
