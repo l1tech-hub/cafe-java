@@ -6,10 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "dish")
 public class Dish {
 
   @Id
@@ -57,5 +55,8 @@ public class Dish {
 
   public void setRecipe(Recipe recipe) {
     this.recipe = recipe;
+    if (recipe != null) {
+      recipe.setDish(this); // синхронизируем владельца
+    }
   }
 }

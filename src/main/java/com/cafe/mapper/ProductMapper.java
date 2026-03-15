@@ -8,12 +8,10 @@ public class ProductMapper {
   private ProductMapper() {
   }
 
-
   public static ProductDto toDto(Product product) {
     return new ProductDto(
         product.getId(),
-        product.getName(),
-        product.getState()
+        product.getName()
     );
   }
 

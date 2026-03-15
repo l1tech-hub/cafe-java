@@ -17,7 +17,6 @@ public class Product {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   private String name;
-  boolean state;
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Batch> batches = new ArrayList<>();
@@ -37,20 +36,12 @@ public class Product {
     return name;
   }
 
-  public boolean getState() {
-    return state;
-  }
-
   public List<Batch> getBatches() {
     return batches;
   }
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public void setState(boolean state) {
-    this.state = state;
   }
 
   public void setBatches(List<Batch> batches) {

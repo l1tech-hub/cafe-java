@@ -26,7 +26,7 @@ public class ProductController {
 
   @PostMapping
   public Product add(@RequestBody ProductDto dto) {
-    return service.add(dto.getName(), dto.getState());
+    return service.add(dto.getName());
   }
 
   @GetMapping("/{id}")

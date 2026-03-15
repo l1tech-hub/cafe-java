@@ -6,6 +6,7 @@ import com.cafe.entity.Product;
 import com.cafe.entity.Recipe;
 
 public class IngredientMapper {
+
   private IngredientMapper() {
   }
 
@@ -19,9 +20,7 @@ public class IngredientMapper {
     );
   }
 
-  public static Ingredient toEntity(IngredientDto dto,
-      Product product,
-      Recipe recipe) {
+  public static Ingredient toEntity(IngredientDto dto, Product product, Recipe recipe) {
 
     Ingredient ingredient = new Ingredient();
 

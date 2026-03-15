@@ -6,10 +6,10 @@ import com.cafe.entity.Product;
 import com.cafe.mapper.BatchMapper;
 import com.cafe.repository.BatchRepository;
 import com.cafe.repository.ProductRepository;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BatchService {
@@ -23,6 +23,7 @@ public class BatchService {
     this.productRepository = productRepository;
   }
 
+  @Transactional
   public BatchDto create(BatchDto dto) {
 
     Product product = productRepository.findById(dto.getProductId())
@@ -33,34 +34,51 @@ public class BatchService {
     return BatchMapper.toDto(batchRepository.save(batch));
   }
 
+  public BatchDto getById(Long id) {
+
+    Batch batch = batchRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Batch not found"));
+
+    return BatchMapper.toDto(batch);
+  }
+
+  public List<BatchDto> getAll() {
+
+    return batchRepository.findAll()
+        .stream()
+        .map(BatchMapper::toDto)
+        .collect(Collectors.toList());
+  }
+
   public List<BatchDto> getByProduct(Long productId) {
 
     return batchRepository.findByProductId(productId)
         .stream()
         .map(BatchMapper::toDto)
-        .toList();
+        .collect(Collectors.toList());
   }
 
+  @Transactional
   public BatchDto update(Long id, BatchDto dto) {
 
     Batch batch = batchRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Batch not found"));
+        .orElseThrow(() -> new RuntimeException("Batch not found"));
 
     batch.setPrice(dto.getPrice());
     batch.setManufactureDate(dto.getManufactureDate());
     batch.setExpiryDate(dto.getExpiryDate());
 
-    Batch updated = batchRepository.save(batch);
-
-    return BatchMapper.toDto(updated);
-  }
-
-  public void delete(Long id) {
-
-    if (!batchRepository.existsById(id)) {
-      throw new EntityNotFoundException("Batch not found");
+    if (dto.getProductId() != null) {
+      Product product = productRepository.findById(dto.getProductId())
+          .orElseThrow(() -> new RuntimeException("Product not found"));
+      batch.setProduct(product);
     }
 
+    return BatchMapper.toDto(batchRepository.save(batch));
+  }
+
+  @Transactional
+  public void delete(Long id) {
     batchRepository.deleteById(id);
   }
 }

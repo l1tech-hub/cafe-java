@@ -17,11 +17,10 @@ public class ProductService {
     this.repository = repository;
   }
 
-  public Product add(String name, boolean state) {
+  public Product add(String name) {
 
     Product product = new Product();
     product.setName(name);
-    product.setState(state);
 
     return repository.save(product);
   }
@@ -52,7 +51,6 @@ public class ProductService {
         .orElseThrow(() -> new RuntimeException("Product not found"));
 
     product.setName(dto.getName());
-    product.setState(dto.getState());
 
     Product updated = repository.save(product);
 

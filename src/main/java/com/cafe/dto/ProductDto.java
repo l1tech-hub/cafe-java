@@ -4,15 +4,13 @@ public class ProductDto {
 
   private Long id;
   private String name;
-  boolean state;
 
   public ProductDto() {
   }
 
-  public ProductDto(Long id, String name, boolean state) {
+  public ProductDto(Long id, String name) {
     this.id = id;
     this.name = name;
-    this.state = state;
   }
 
   public Long getId() {
@@ -31,11 +29,4 @@ public class ProductDto {
     this.name = name;
   }
 
-  public boolean getState() {
-    return state;
-  }
-
-  public void setState(boolean state) {
-    this.state = state;
-  }
 }

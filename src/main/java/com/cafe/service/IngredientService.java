@@ -1,13 +1,18 @@
 package com.cafe.service;
 
 import com.cafe.dto.IngredientDto;
+import com.cafe.entity.Batch;
 import com.cafe.entity.Ingredient;
 import com.cafe.entity.Product;
+import com.cafe.entity.Recipe;
 import com.cafe.mapper.IngredientMapper;
 import com.cafe.repository.IngredientRepository;
 import com.cafe.repository.ProductRepository;
+import com.cafe.repository.RecipeRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IngredientService {
@@ -43,6 +48,19 @@ public class IngredientService {
         .stream()
         .map(IngredientMapper::toDto)
         .toList();
+  }
+
+  @Transactional
+  public Ingredient updateIngredient(Long id, Ingredient updatedIngredient) {
+
+    Ingredient ingredient = repository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("ingredient not found"));
+
+    ingredient.setQuantity(updatedIngredient.getQuantity());
+    ingredient.setRecipe(updatedIngredient.getRecipe());
+    ingredient.setProduct(updatedIngredient.getProduct());
+
+    return repository.save(ingredient);
   }
 
   public void delete(Long id) {
