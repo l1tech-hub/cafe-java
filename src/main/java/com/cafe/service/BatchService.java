@@ -7,7 +7,6 @@ import com.cafe.mapper.BatchMapper;
 import com.cafe.repository.BatchRepository;
 import com.cafe.repository.ProductRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +46,7 @@ public class BatchService {
     return batchRepository.findAll()
         .stream()
         .map(BatchMapper::toDto)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public List<BatchDto> getByProduct(Long productId) {
@@ -55,7 +54,7 @@ public class BatchService {
     return batchRepository.findByProductId(productId)
         .stream()
         .map(BatchMapper::toDto)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Transactional
