@@ -18,7 +18,7 @@ public class Dish {
 
   private Double price;
 
-  @OneToOne(mappedBy = "dish", cascade = CascadeType.ALL)
+  @OneToOne(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
   private Recipe recipe;
 
   public Dish() {

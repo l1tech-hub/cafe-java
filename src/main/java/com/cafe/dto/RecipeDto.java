@@ -8,15 +8,18 @@ public class RecipeDto {
   private Long id;
   private String name;
   private String instructions;
+  private Long dishId;
 
   private List<IngredientDto> ingredients = new ArrayList<>();
 
+
   public RecipeDto() {}
 
-  public RecipeDto(Long id, String name, String instructions) {
+  public RecipeDto(Long id, String name, String instructions, Long dishId) {
     this.id = id;
     this.name = name;
     this.instructions = instructions;
+    this.dishId = dishId;
   }
 
   public Long getId() {
@@ -35,6 +38,10 @@ public class RecipeDto {
     return ingredients;
   }
 
+  public Long getDishId() {
+    return dishId;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -49,5 +56,9 @@ public class RecipeDto {
 
   public void setIngredients(List<IngredientDto> ingredients) {
     this.ingredients = ingredients;
+  }
+
+  public void setDishId(Long dishId) {
+    this.dishId = dishId;
   }
 }

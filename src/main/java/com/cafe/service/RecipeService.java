@@ -4,6 +4,7 @@ import com.cafe.dto.CreateRecipeDto;
 import com.cafe.dto.IngredientDto;
 import com.cafe.dto.RecipeDto;
 import com.cafe.dto.RecipeIngredientRequestDto;
+import com.cafe.entity.Dish;
 import com.cafe.entity.Ingredient;
 import com.cafe.entity.Product;
 import com.cafe.entity.Recipe;
@@ -41,7 +42,6 @@ public class RecipeService {
   @Transactional
   public Recipe createRecipeWithIngredients(CreateRecipeDto request) {
 
-    // Создаём новый рецепт
     Recipe recipe = new Recipe();
     recipe.setInstructions(request.getInstructions());
     recipeRepository.save(recipe);
@@ -81,7 +81,10 @@ public class RecipeService {
 
     Recipe recipe = recipeRepository.findById(id).orElseThrow();
 
-    ingredientRepository.deleteAll(recipe.getIngredients());
+    Dish dish = recipe.getDish();
+    if (dish != null) {
+      dish.setRecipe(null); // разрываем связь
+    }
 
     recipeRepository.delete(recipe);
   }
