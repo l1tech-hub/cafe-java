@@ -30,7 +30,7 @@ public class RecipeController {
     return service.createRecipe(recipe);
   }
 
-  @PostMapping("/wihtingredients")
+  @PostMapping("/withingredients")
   public Recipe createWithIngredients(@RequestBody CreateRecipeDto request) {
     return service.createRecipeWithIngredients(request);
   }

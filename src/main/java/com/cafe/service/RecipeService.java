@@ -9,6 +9,7 @@ import com.cafe.entity.Ingredient;
 import com.cafe.entity.Product;
 import com.cafe.entity.Recipe;
 import com.cafe.mapper.RecipeMapper;
+import com.cafe.repository.DishRepository;
 import com.cafe.repository.IngredientRepository;
 import com.cafe.repository.ProductRepository;
 import com.cafe.repository.RecipeRepository;
@@ -23,15 +24,18 @@ public class RecipeService {
   private final RecipeRepository recipeRepository;
   private final IngredientRepository ingredientRepository;
   private final ProductRepository productRepository;
+  private final DishRepository dishRepository;
 
   public RecipeService(
       RecipeRepository recipeRepository,
       IngredientRepository ingredientRepository,
-      ProductRepository productRepository
+      ProductRepository productRepository,
+      DishRepository dishRepository
   ) {
     this.recipeRepository = recipeRepository;
     this.ingredientRepository = ingredientRepository;
     this.productRepository = productRepository;
+    this.dishRepository = dishRepository;
   }
 
   @Transactional
@@ -39,12 +43,22 @@ public class RecipeService {
     return recipeRepository.save(recipe);
   }
 
-  @Transactional
+  //@Transactional
   public Recipe createRecipeWithIngredients(CreateRecipeDto request) {
 
     Recipe recipe = new Recipe();
+    recipe.setName(request.getName());
     recipe.setInstructions(request.getInstructions());
+
+    if (request.getDishId() != null) {
+      Dish dish = dishRepository.findById(request.getDishId())
+          .orElseThrow(() -> new EntityNotFoundException("Dish not found"));
+      recipe.setDish(dish);
+    }
+
     recipeRepository.save(recipe);
+
+
 
     for (IngredientDto dto : request.getIngredients()) {
       saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
@@ -83,12 +97,13 @@ public class RecipeService {
 
     Dish dish = recipe.getDish();
     if (dish != null) {
-      dish.setRecipe(null); // разрываем связь
+      dish.setRecipe(null);
     }
 
     recipeRepository.delete(recipe);
   }
 
+  @Transactional
   public Recipe addIngredients(Long recipeId, List<RecipeIngredientRequestDto> ingredientsDto) {
 
     Recipe recipe = recipeRepository.findById(recipeId)
