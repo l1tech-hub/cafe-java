@@ -66,6 +66,7 @@ public class DishService {
 
     dish.setName(dto.getName());
     dish.setPrice(dto.getPrice());
+    dish.setWeight(dto.getWeight());
 
     if (dto.getRecipeId() != null) {
       Recipe newRecipe = recipeRepository.findById(dto.getRecipeId())

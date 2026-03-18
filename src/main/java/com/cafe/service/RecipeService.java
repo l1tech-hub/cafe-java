@@ -43,7 +43,7 @@ public class RecipeService {
     return recipeRepository.save(recipe);
   }
 
-  //@Transactional
+  @Transactional
   public Recipe createRecipeWithIngredients(CreateRecipeDto request) {
 
     Recipe recipe = new Recipe();
@@ -74,8 +74,8 @@ public class RecipeService {
         .toList();
   }
 
-  public Recipe getById(Long id) {
-    return recipeRepository.findById(id).orElseThrow();
+  public RecipeDto getById(Long id) {
+    return RecipeMapper.toDto(recipeRepository.findById(id).orElseThrow());
   }
 
   @Transactional

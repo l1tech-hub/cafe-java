@@ -15,6 +15,7 @@ public class BatchMapper {
         batch.getId(),
         batch.getProduct().getId(),
         batch.getPrice(),
+        batch.getQuantity(),
         batch.getManufactureDate(),
         batch.getExpiryDate()
     );
@@ -26,6 +27,7 @@ public class BatchMapper {
 
     batch.setProduct(product);
     batch.setPrice(dto.getPrice());
+    batch.setQuantity(dto.getQuantity());
     batch.setManufactureDate(dto.getManufactureDate());
     batch.setExpiryDate(dto.getExpiryDate());
 

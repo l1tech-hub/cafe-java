@@ -7,17 +7,19 @@ public class BatchDto {
   private Long id;
   private Long productId;
   private Double price;
+  private Double quantity;
   private LocalDate manufactureDate;
   private LocalDate expiryDate;
 
   public BatchDto() {
   }
 
-  public BatchDto(Long id, Long productId, Double price,
+  public BatchDto(Long id, Long productId, Double price, Double quantity,
       LocalDate manufactureDate, LocalDate expiryDate) {
     this.id = id;
     this.productId = productId;
     this.price = price;
+    this.quantity = quantity;
     this.manufactureDate = manufactureDate;
     this.expiryDate = expiryDate;
   }
@@ -42,6 +44,10 @@ public class BatchDto {
     return expiryDate;
   }
 
+  public Double getQuantity() {
+    return quantity;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -60,5 +66,9 @@ public class BatchDto {
 
   public void setExpiryDate(LocalDate expiryDate) {
     this.expiryDate = expiryDate;
+  }
+
+  public void setQuantity(Double quantity) {
+    this.quantity = quantity;
   }
 }

@@ -18,6 +18,7 @@ public class Batch {
   private Long id;
 
   private Double price;
+  private Double quantity;
 
   private LocalDate manufactureDate;
   private LocalDate expiryDate;
@@ -29,10 +30,11 @@ public class Batch {
   public Batch() {
   }
 
-  public Batch(Double price, LocalDate manufactureDate, LocalDate expiryDate) {
+  public Batch(Double price, LocalDate manufactureDate, LocalDate expiryDate, Double quantity) {
     this.price = price;
     this.manufactureDate = manufactureDate;
     this.expiryDate = expiryDate;
+    this.quantity = quantity;
   }
 
   public Long getId() {
@@ -55,6 +57,10 @@ public class Batch {
     return product;
   }
 
+  public Double getQuantity() {
+    return quantity;
+  }
+
   public void setPrice(Double price) {
     this.price = price;
   }
@@ -69,5 +75,9 @@ public class Batch {
 
   public void setProduct(Product product) {
     this.product = product;
+  }
+
+  public void setQuantity(Double quantity) {
+    this.quantity = quantity;
   }
 }

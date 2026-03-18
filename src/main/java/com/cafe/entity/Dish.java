@@ -17,6 +17,7 @@ public class Dish {
   private String name;
 
   private Double price;
+  private Double weight;
 
   @OneToOne(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
   private Recipe recipe;
@@ -41,6 +42,10 @@ public class Dish {
     return recipe;
   }
 
+  public Double getWeight() {
+    return weight;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -58,5 +63,9 @@ public class Dish {
     if (recipe != null) {
       recipe.setDish(this); // синхронизируем владельца
     }
+  }
+
+  public void setWeight(Double weight) {
+    this.weight = weight;
   }
 }

@@ -49,15 +49,12 @@ public class RecipeController {
   }
 
   @GetMapping("/{id}")
-  public Recipe getById(@PathVariable Long id) {
+  public RecipeDto getById(@PathVariable Long id) {
     return service.getById(id);
   }
 
   @PutMapping("/{id}")
-  public Recipe update(
-      @PathVariable Long id,
-      @RequestBody Recipe recipe
-  ) {
+  public Recipe update(@PathVariable Long id, @RequestBody Recipe recipe) {
     return service.updateRecipe(id, recipe);
   }
 

@@ -21,6 +21,7 @@ public class DishMapper {
         dish.getId(),
         dish.getName(),
         dish.getPrice(),
+        dish.getWeight(),
         recipeId
     );
   }
@@ -32,6 +33,7 @@ public class DishMapper {
     dish.setId(dto.getId());
     dish.setName(dto.getName());
     dish.setPrice(dto.getPrice());
+    dish.setWeight(dto.getWeight());
     dish.setRecipe(recipe);
 
     return dish;

@@ -6,6 +6,7 @@ import com.cafe.entity.Product;
 import com.cafe.mapper.BatchMapper;
 import com.cafe.repository.BatchRepository;
 import com.cafe.repository.ProductRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ public class BatchService {
   public BatchDto create(BatchDto dto) {
 
     Product product = productRepository.findById(dto.getProductId())
-        .orElseThrow(() -> new RuntimeException("Product not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
     Batch batch = BatchMapper.toEntity(dto, product);
 
@@ -36,7 +37,7 @@ public class BatchService {
   public BatchDto getById(Long id) {
 
     Batch batch = batchRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Batch not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Batch not found"));
 
     return BatchMapper.toDto(batch);
   }
@@ -50,6 +51,9 @@ public class BatchService {
   }
 
   public List<BatchDto> getByProduct(Long productId) {
+    if (!productRepository.existsById(productId)) {
+      throw new EntityNotFoundException("Product not found with id: " + productId);
+    }
 
     return batchRepository.findByProductId(productId)
         .stream()
@@ -61,7 +65,7 @@ public class BatchService {
   public BatchDto update(Long id, BatchDto dto) {
 
     Batch batch = batchRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Batch not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Batch not found"));
 
     batch.setPrice(dto.getPrice());
     batch.setManufactureDate(dto.getManufactureDate());
@@ -69,7 +73,7 @@ public class BatchService {
 
     if (dto.getProductId() != null) {
       Product product = productRepository.findById(dto.getProductId())
-          .orElseThrow(() -> new RuntimeException("Product not found"));
+          .orElseThrow(() -> new EntityNotFoundException("Product not found"));
       batch.setProduct(product);
     }
 
