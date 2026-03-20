@@ -3,6 +3,7 @@ package com.cafe.service;
 import com.cafe.dto.ProductDto;
 import com.cafe.entity.Product;
 import com.cafe.mapper.ProductMapper;
+import com.cafe.repository.IngredientRepository;
 import com.cafe.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Service;
 public class ProductService {
 
   private final ProductRepository repository;
+  private final IngredientRepository ingredientRepository;
 
-  public ProductService(ProductRepository repository) {
+  public ProductService(ProductRepository repository, IngredientRepository ingredientRepository) {
     this.repository = repository;
+    this.ingredientRepository = ingredientRepository;
   }
 
   public Product add(String name) {
@@ -61,6 +64,10 @@ public class ProductService {
 
     if (!repository.existsById(id)) {
       throw new EntityNotFoundException("Product not found");
+    }
+
+    if (ingredientRepository.existsByProductId(id)) {
+      throw new IllegalStateException("This product is used in ingredients, delete not permitted");
     }
 
     repository.deleteById(id);

@@ -58,8 +58,6 @@ public class RecipeService {
 
     recipeRepository.save(recipe);
 
-
-
     for (IngredientDto dto : request.getIngredients()) {
       saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
     }

@@ -21,6 +21,9 @@ public class Product {
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Batch> batches = new ArrayList<>();
 
+  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  private List<Ingredient> ingredients;
+
   public Product() {
   }
 
