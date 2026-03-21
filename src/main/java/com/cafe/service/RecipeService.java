@@ -15,11 +15,16 @@ import com.cafe.repository.ProductRepository;
 import com.cafe.repository.RecipeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RecipeService {
+
+
+  private static final String DISH_NOT_FOUND_MSG = "Dish not found";
 
   private final RecipeRepository recipeRepository;
   private final IngredientRepository ingredientRepository;
@@ -39,8 +44,12 @@ public class RecipeService {
   }
 
   @Transactional
-  public Recipe createRecipe(Recipe recipe) {
-    return recipeRepository.save(recipe);
+  public RecipeDto createRecipe(RecipeDto dto) {
+
+    Dish dish = dishRepository.findById(dto.getDishId())
+        .orElseThrow(() -> new EntityNotFoundException(DISH_NOT_FOUND_MSG));
+    Recipe recipe = RecipeMapper.toEntity(dto, dish);
+    return RecipeMapper.toDto(recipeRepository.save(recipe));
   }
 
   @Transactional
@@ -52,7 +61,7 @@ public class RecipeService {
 
     if (request.getDishId() != null) {
       Dish dish = dishRepository.findById(request.getDishId())
-          .orElseThrow(() -> new EntityNotFoundException("Dish not found"));
+          .orElseThrow(() -> new EntityNotFoundException(DISH_NOT_FOUND_MSG));
       recipe.setDish(dish);
     }
 
@@ -72,20 +81,30 @@ public class RecipeService {
         .toList();
   }
 
+  public Page<RecipeDto> getAllPaged(Pageable pageable) {
+    return recipeRepository.findAllPageable(pageable)
+        .map(RecipeMapper::toDto);
+  }
+
   public RecipeDto getById(Long id) {
     return RecipeMapper.toDto(recipeRepository.findById(id).orElseThrow());
   }
 
   @Transactional
-  public Recipe updateRecipe(Long id, Recipe updatedRecipe) {
+  public RecipeDto updateRecipe(Long id, RecipeDto updatedRecipe) {
 
     Recipe recipe = recipeRepository.findById(id).orElseThrow();
 
     recipe.setName(updatedRecipe.getName());
     recipe.setInstructions(updatedRecipe.getInstructions());
-    recipe.setDish(updatedRecipe.getDish());
 
-    return recipeRepository.save(recipe);
+    if (updatedRecipe.getDishId() != null) {
+      Dish dish = dishRepository.findById(updatedRecipe.getDishId())
+          .orElseThrow(() -> new EntityNotFoundException(DISH_NOT_FOUND_MSG));
+      recipe.setDish(dish);
+    }
+
+    return RecipeMapper.toDto(recipeRepository.save(recipe));
   }
 
   @Transactional

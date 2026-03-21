@@ -33,10 +33,10 @@ public class IngredientService {
   public IngredientDto add(IngredientDto dto) {
 
     Product product = productRepository.findById(dto.getProductId())
-        .orElseThrow(() -> new RuntimeException("Product not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
     Recipe recipe = recipeRepository.findById(dto.getRecipeId())
-        .orElseThrow(() -> new RuntimeException("Recipe not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
 
     Ingredient ingredient = IngredientMapper.toEntity(dto, product, recipe);
 

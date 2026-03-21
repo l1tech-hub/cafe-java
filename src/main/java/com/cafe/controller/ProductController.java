@@ -3,7 +3,9 @@ package com.cafe.controller;
 import com.cafe.dto.ProductDto;
 import com.cafe.entity.Product;
 import com.cafe.service.ProductService;
+import java.awt.print.Pageable;
 import java.util.List;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +40,7 @@ public class ProductController {
   public List<ProductDto> getAll() {
     return service.getAll();
   }
+
 
   @GetMapping("/search")
   public List<Product> searchByName(@RequestParam String name) {

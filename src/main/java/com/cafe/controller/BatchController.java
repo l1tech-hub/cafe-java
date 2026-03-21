@@ -3,6 +3,9 @@ package com.cafe.controller;
 import com.cafe.dto.BatchDto;
 import com.cafe.service.BatchService;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +43,21 @@ public class BatchController {
   @GetMapping("/product/{productId}")
   public List<BatchDto> getByProduct(@PathVariable Long productId) {
     return service.getByProduct(productId);
+  }
+
+  @GetMapping("/paged")
+  public Page<BatchDto> getAllPaged(
+      @PageableDefault(size = 5, sort = "id") Pageable pageable
+  ) {
+    return service.getAllPaged(pageable);
+  }
+
+  @GetMapping("/product/{productId}/paged")
+  public Page<BatchDto> getByProductPaged(
+      @PathVariable Long productId,
+      @PageableDefault(size = 5, sort = "id") Pageable pageable
+  ) {
+    return service.getByProductPaged(productId, pageable);
   }
 
   @PutMapping("/{id}")

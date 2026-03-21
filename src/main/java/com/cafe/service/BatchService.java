@@ -8,6 +8,8 @@ import com.cafe.repository.BatchRepository;
 import com.cafe.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,19 @@ public class BatchService {
         .stream()
         .map(BatchMapper::toDto)
         .toList();
+  }
+
+  public Page<BatchDto> getAllPaged(Pageable pageable) {
+    return batchRepository.findAll(pageable)
+        .map(BatchMapper::toDto);
+  }
+
+  public Page<BatchDto> getByProductPaged(Long productId, Pageable pageable) {
+    if (!productRepository.existsById(productId)) {
+      throw new EntityNotFoundException("Product not found with id: " + productId);
+    }
+    return batchRepository.findByProductId(productId, pageable)
+        .map(BatchMapper::toDto);
   }
 
   @Transactional
