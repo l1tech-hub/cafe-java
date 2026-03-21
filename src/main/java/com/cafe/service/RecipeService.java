@@ -13,6 +13,7 @@ import com.cafe.repository.DishRepository;
 import com.cafe.repository.IngredientRepository;
 import com.cafe.repository.ProductRepository;
 import com.cafe.repository.RecipeRepository;
+import com.cafe.service.cache.RecipeCache;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RecipeService {
 
-
   private static final String DISH_NOT_FOUND_MSG = "Dish not found";
 
   private final RecipeRepository recipeRepository;
@@ -31,30 +31,32 @@ public class RecipeService {
   private final ProductRepository productRepository;
   private final DishRepository dishRepository;
 
-  public RecipeService(
-      RecipeRepository recipeRepository,
-      IngredientRepository ingredientRepository,
-      ProductRepository productRepository,
-      DishRepository dishRepository
-  ) {
+  private final RecipeCache recipeCache;
+
+  public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository,
+      ProductRepository productRepository, DishRepository dishRepository, RecipeCache recipeCache) {
     this.recipeRepository = recipeRepository;
     this.ingredientRepository = ingredientRepository;
     this.productRepository = productRepository;
     this.dishRepository = dishRepository;
+    this.recipeCache = recipeCache;
   }
 
   @Transactional
   public RecipeDto createRecipe(RecipeDto dto) {
-
     Dish dish = dishRepository.findById(dto.getDishId())
         .orElseThrow(() -> new EntityNotFoundException(DISH_NOT_FOUND_MSG));
+
     Recipe recipe = RecipeMapper.toEntity(dto, dish);
-    return RecipeMapper.toDto(recipeRepository.save(recipe));
+    Recipe saved = recipeRepository.save(recipe);
+
+    recipeCache.clearAll();
+
+    return RecipeMapper.toDto(saved);
   }
 
   @Transactional
   public Recipe createRecipeWithIngredients(CreateRecipeDto request) {
-
     Recipe recipe = new Recipe();
     recipe.setName(request.getName());
     recipe.setInstructions(request.getInstructions());
@@ -71,28 +73,55 @@ public class RecipeService {
       saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
     }
 
+    recipeCache.clearAll();
+
     return recipe;
   }
 
   public List<RecipeDto> getAll() {
-    return recipeRepository.findAll()
-        .stream()
-        .map(RecipeMapper::toDto)
-        .toList();
+    List<RecipeDto> cached = recipeCache.getAll();
+    if (cached != null) {
+      return cached;
+    }
+
+    List<RecipeDto> result = recipeRepository.findAll().stream().map(RecipeMapper::toDto).toList();
+
+    recipeCache.putAll(result);
+
+    return result;
   }
 
   public Page<RecipeDto> getAllPaged(Pageable pageable) {
-    return recipeRepository.findAllPageable(pageable)
-        .map(RecipeMapper::toDto);
+    Page<RecipeDto> cached = recipeCache.getPage(pageable);
+    if (cached != null) {
+      return cached;
+    }
+
+    Page<RecipeDto> page = recipeRepository.findAllPageable(pageable).map(RecipeMapper::toDto);
+
+    recipeCache.putPage(pageable, page);
+
+    return page;
   }
 
   public RecipeDto getById(Long id) {
-    return RecipeMapper.toDto(recipeRepository.findById(id).orElseThrow());
+    RecipeDto cached = recipeCache.getById(id);
+    if (cached != null) {
+      return cached;
+    }
+
+    Recipe recipe = recipeRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+
+    RecipeDto dto = RecipeMapper.toDto(recipe);
+
+    recipeCache.putById(id, dto);
+
+    return dto;
   }
 
   @Transactional
   public RecipeDto updateRecipe(Long id, RecipeDto updatedRecipe) {
-
     Recipe recipe = recipeRepository.findById(id).orElseThrow();
 
     recipe.setName(updatedRecipe.getName());
@@ -104,12 +133,16 @@ public class RecipeService {
       recipe.setDish(dish);
     }
 
-    return RecipeMapper.toDto(recipeRepository.save(recipe));
+    recipeCache.evictById(id);
+    recipeCache.clearAllPages();
+    recipeCache.clearAllList();
+
+    Recipe saved = recipeRepository.save(recipe);
+    return RecipeMapper.toDto(saved);
   }
 
   @Transactional
   public void deleteRecipe(Long id) {
-
     Recipe recipe = recipeRepository.findById(id).orElseThrow();
 
     Dish dish = recipe.getDish();
@@ -118,11 +151,13 @@ public class RecipeService {
     }
 
     recipeRepository.delete(recipe);
+
+    recipeCache.evictById(id);
+    recipeCache.clearAll();
   }
 
   @Transactional
   public Recipe addIngredients(Long recipeId, List<RecipeIngredientRequestDto> ingredientsDto) {
-
     Recipe recipe = recipeRepository.findById(recipeId)
         .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
 
@@ -130,13 +165,15 @@ public class RecipeService {
       saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
     }
 
+    recipeCache.evictById(recipeId);
+    recipeCache.clearAll();
+
     return recipe;
   }
 
   private void saveIngredient(Recipe recipe, Long productId, Double quantity) {
-    Product product = productRepository.findById(productId)
-        .orElseThrow(() -> new EntityNotFoundException(
-            "Product with id " + productId + " not found"));
+    Product product = productRepository.findById(productId).orElseThrow(
+        () -> new EntityNotFoundException("Product with id " + productId + " not found"));
 
     Ingredient ingredient = new Ingredient();
     ingredient.setRecipe(recipe);
