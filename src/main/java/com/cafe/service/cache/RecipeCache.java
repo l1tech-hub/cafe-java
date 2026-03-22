@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class RecipeCache {
 
   private final Map<Long, RecipeDto> byId = new HashMap<>();
-  private final Map<String, Page<RecipeDto>> pages = new HashMap<>();
+  private final Map<RecipeCacheKey, Page<RecipeDto>> pages = new HashMap<>();
   private List<RecipeDto> all;
 
   public RecipeDto getById(Long id) {
@@ -40,11 +40,11 @@ public class RecipeCache {
   }
 
   public Page<RecipeDto> getPage(Pageable pageable) {
-    return pages.get(buildKey(pageable));
+    return pages.get(new RecipeCacheKey(pageable));
   }
 
   public void putPage(Pageable pageable, Page<RecipeDto> page) {
-    pages.put(buildKey(pageable), page);
+    pages.put(new RecipeCacheKey(pageable), page);
   }
 
   public void clearAllPages() {
@@ -55,9 +55,5 @@ public class RecipeCache {
     byId.clear();
     pages.clear();
     all = null;
-  }
-
-  private String buildKey(Pageable pageable) {
-    return pageable.getPageNumber() + "_" + pageable.getPageSize() + "_" + pageable.getSort();
   }
 }

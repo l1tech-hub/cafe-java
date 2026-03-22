@@ -83,6 +83,7 @@ public class BatchService {
         .orElseThrow(() -> new EntityNotFoundException("Batch not found"));
 
     batch.setPrice(dto.getPrice());
+    batch.setQuantity(dto.getQuantity());
     batch.setManufactureDate(dto.getManufactureDate());
     batch.setExpiryDate(dto.getExpiryDate());
 
