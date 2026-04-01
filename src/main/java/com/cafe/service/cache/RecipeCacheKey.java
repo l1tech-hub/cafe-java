@@ -19,13 +19,17 @@ public class RecipeCacheKey {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof RecipeCacheKey)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof RecipeCacheKey)) {
+      return false;
+    }
     RecipeCacheKey that = (RecipeCacheKey) o;
-    return page == that.page &&
-        size == that.size &&
-        Objects.equals(sort, that.sort) &&
-        dishId == that.dishId;
+    return page == that.page
+        && size == that.size
+        && Objects.equals(sort, that.sort)
+        && dishId == that.dishId;
   }
 
   @Override

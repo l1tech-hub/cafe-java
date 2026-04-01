@@ -5,6 +5,7 @@ import com.cafe.dto.RecipeDto;
 import com.cafe.dto.RecipeIngredientRequestDto;
 import com.cafe.entity.Recipe;
 import com.cafe.service.RecipeService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,19 +31,19 @@ public class RecipeController {
   }
 
   @PostMapping
-  public RecipeDto create(@RequestBody RecipeDto recipe) {
+  public RecipeDto create(@RequestBody @Valid RecipeDto recipe) {
     return service.createRecipe(recipe);
   }
 
   @PostMapping("/withingredients")
-  public Recipe createWithIngredients(@RequestBody CreateRecipeDto request) {
+  public Recipe createWithIngredients(@RequestBody @Valid CreateRecipeDto request) {
     return service.createRecipeWithIngredients(request);
   }
 
   @PostMapping("/{id}/ingredients")
   public Recipe addIngredients(
-      @PathVariable Long id,
-      @RequestBody List<RecipeIngredientRequestDto> ingredients
+      @PathVariable @Valid Long id,
+      @RequestBody @Valid List<RecipeIngredientRequestDto> ingredients
   ) {
     return service.addIngredients(id, ingredients);
   }
@@ -54,24 +55,24 @@ public class RecipeController {
 
   @GetMapping("/paged")
   public Page<RecipeDto> getAllPaged(
-      @RequestParam(required = false) Long dishId,
-      @PageableDefault(size = 5, sort = "id") Pageable pageable
+      @RequestParam(required = false) @Valid Long dishId,
+      @PageableDefault(size = 5, sort = "id") @Valid Pageable pageable
   ) {
     return service.getAllPaged(pageable, dishId);
   }
 
   @GetMapping("/{id}")
-  public RecipeDto getById(@PathVariable Long id) {
+  public RecipeDto getById(@PathVariable @Valid Long id) {
     return service.getById(id);
   }
 
   @PutMapping("/{id}")
-  public RecipeDto update(@PathVariable Long id, @RequestBody RecipeDto recipe) {
+  public RecipeDto update(@PathVariable @Valid Long id, @RequestBody @Valid RecipeDto recipe) {
     return service.updateRecipe(id, recipe);
   }
 
   @DeleteMapping("/{id}")
-  public void delete(@PathVariable Long id) {
+  public void delete(@PathVariable @Valid Long id) {
     service.deleteRecipe(id);
   }
 }

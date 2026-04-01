@@ -2,6 +2,7 @@ package com.cafe.controller;
 
 import com.cafe.dto.DishDto;
 import com.cafe.service.DishService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,12 +25,12 @@ public class DishController {
   }
 
   @PostMapping
-  public DishDto create(@RequestBody DishDto dto) {
+  public DishDto create(@RequestBody @Valid DishDto dto) {
     return service.create(dto);
   }
 
   @GetMapping("/{id}")
-  public DishDto getById(@PathVariable Long id) {
+  public DishDto getById(@PathVariable @Valid Long id) {
     return service.getById(id);
   }
 
@@ -39,17 +40,17 @@ public class DishController {
   }
 
   @PutMapping("/{id}")
-  public DishDto update(@PathVariable Long id, @RequestBody DishDto dto) {
+  public DishDto update(@PathVariable @Valid Long id, @RequestBody @Valid DishDto dto) {
     return service.update(id, dto);
   }
 
   @DeleteMapping("/{id}")
-  public void delete(@PathVariable Long id) {
+  public void delete(@PathVariable @Valid Long id) {
     service.delete(id);
   }
 
   @GetMapping("/search")
-  public List<DishDto> search(@RequestParam String name) {
+  public List<DishDto> search(@RequestParam @Valid String name) {
     return service.searchByName(name);
   }
 }
