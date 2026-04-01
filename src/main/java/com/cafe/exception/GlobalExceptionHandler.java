@@ -3,6 +3,8 @@ package com.cafe.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,9 +14,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
   @ExceptionHandler(RuntimeException.class)
   public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex,
       HttpServletRequest request) {
+
+    log.error("RuntimeException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
@@ -30,6 +36,8 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex,
       HttpServletRequest request) {
 
+    log.error("ResourceNotFoundException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
         HttpStatus.NOT_FOUND.value(),
@@ -37,13 +45,14 @@ public class GlobalExceptionHandler {
         ex.getMessage(),
         request.getRequestURI()
     );
-
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
   }
 
   @ExceptionHandler(InvalidDataException.class)
   public ResponseEntity<ErrorResponse> handleInvalidData(InvalidDataException ex,
       HttpServletRequest request) {
+
+    log.error("InvalidDataException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
@@ -52,13 +61,14 @@ public class GlobalExceptionHandler {
         ex.getMessage(),
         request.getRequestURI()
     );
-
     return ResponseEntity.badRequest().body(response);
   }
 
   @ExceptionHandler(ResourceInUseException.class)
   public ResponseEntity<ErrorResponse> handleResourceInUse(ResourceInUseException ex,
       HttpServletRequest request) {
+
+    log.error("ResourceInUseException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
@@ -67,7 +77,6 @@ public class GlobalExceptionHandler {
         ex.getMessage(),
         request.getRequestURI()
     );
-
     return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
   }
 
@@ -81,17 +90,17 @@ public class GlobalExceptionHandler {
         .map(f -> f.getField() + ": " + f.getDefaultMessage())
         .toList();
 
+    String message = String.join("; ", errors);
+
+    log.error("Validation error at {}: {}", request.getRequestURI(), message, ex);
+
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
         HttpStatus.BAD_REQUEST.value(),
         HttpStatus.BAD_REQUEST.getReasonPhrase(),
-        String.join("; ", errors),
+        message,
         request.getRequestURI()
     );
-
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 }
-
-
-

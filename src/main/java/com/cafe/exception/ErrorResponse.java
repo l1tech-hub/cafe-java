@@ -1,7 +1,6 @@
 package com.cafe.exception;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class ErrorResponse {
 
