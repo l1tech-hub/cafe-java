@@ -8,13 +8,14 @@ import com.cafe.entity.Dish;
 import com.cafe.entity.Ingredient;
 import com.cafe.entity.Product;
 import com.cafe.entity.Recipe;
+import com.cafe.exception.InvalidDataException;
+import com.cafe.exception.ResourceNotFoundException;
 import com.cafe.mapper.RecipeMapper;
 import com.cafe.repository.DishRepository;
 import com.cafe.repository.IngredientRepository;
 import com.cafe.repository.ProductRepository;
 import com.cafe.repository.RecipeRepository;
 import com.cafe.service.cache.RecipeCache;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RecipeService {
 
-  private static final String DISH_NOT_FOUND_MSG = "Dish not found";
+  private static final String RECIPE_MSG = "Recipe";
 
   private final RecipeRepository recipeRepository;
   private final IngredientRepository ingredientRepository;
@@ -44,8 +45,12 @@ public class RecipeService {
 
   @Transactional
   public RecipeDto createRecipe(RecipeDto dto) {
-    Dish dish = dishRepository.findById(dto.getDishId())
-        .orElseThrow(() -> new EntityNotFoundException(DISH_NOT_FOUND_MSG));
+
+    Dish dish = null;
+    if (dto.getDishId() != null) {
+      dish = dishRepository.findById(dto.getDishId())
+          .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", dto.getDishId()));
+    }
 
     Recipe recipe = RecipeMapper.toEntity(dto, dish);
     Recipe saved = recipeRepository.save(recipe);
@@ -57,20 +62,23 @@ public class RecipeService {
 
   @Transactional
   public Recipe createRecipeWithIngredients(CreateRecipeDto request) {
+
     Recipe recipe = new Recipe();
     recipe.setName(request.getName());
     recipe.setInstructions(request.getInstructions());
 
     if (request.getDishId() != null) {
       Dish dish = dishRepository.findById(request.getDishId())
-          .orElseThrow(() -> new EntityNotFoundException(DISH_NOT_FOUND_MSG));
+          .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", request.getDishId()));
       recipe.setDish(dish);
     }
 
     recipeRepository.save(recipe);
 
-    for (IngredientDto dto : request.getIngredients()) {
-      saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
+    if (request.getIngredients() != null) {
+      for (IngredientDto dto : request.getIngredients()) {
+        saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
+      }
     }
 
     recipeCache.clearAll();
@@ -84,10 +92,12 @@ public class RecipeService {
       return cached;
     }
 
-    List<RecipeDto> result = recipeRepository.findAll().stream().map(RecipeMapper::toDto).toList();
+    List<RecipeDto> result = recipeRepository.findAll()
+        .stream()
+        .map(RecipeMapper::toDto)
+        .toList();
 
     recipeCache.putAll(result);
-
     return result;
   }
 
@@ -97,10 +107,10 @@ public class RecipeService {
       return cached;
     }
 
-    Page<RecipeDto> page = recipeRepository.findAllPageable(pageable, dishId).map(RecipeMapper::toDto);
+    Page<RecipeDto> page = recipeRepository.findAllPageable(pageable, dishId)
+        .map(RecipeMapper::toDto);
 
     recipeCache.putPage(pageable, page, dishId);
-
     return page;
   }
 
@@ -111,10 +121,9 @@ public class RecipeService {
     }
 
     Recipe recipe = recipeRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", id));
 
     RecipeDto dto = RecipeMapper.toDto(recipe);
-
     recipeCache.putById(id, dto);
 
     return dto;
@@ -122,15 +131,20 @@ public class RecipeService {
 
   @Transactional
   public RecipeDto updateRecipe(Long id, RecipeDto updatedRecipe) {
-    Recipe recipe = recipeRepository.findById(id).orElseThrow();
+
+    Recipe recipe = recipeRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", id));
 
     recipe.setName(updatedRecipe.getName());
     recipe.setInstructions(updatedRecipe.getInstructions());
 
     if (updatedRecipe.getDishId() != null) {
       Dish dish = dishRepository.findById(updatedRecipe.getDishId())
-          .orElseThrow(() -> new EntityNotFoundException(DISH_NOT_FOUND_MSG));
+          .orElseThrow(() -> new ResourceNotFoundException("Dish", "id",
+              updatedRecipe.getDishId()));
       recipe.setDish(dish);
+    } else {
+      recipe.setDish(null);
     }
 
     recipeCache.evictById(id);
@@ -143,7 +157,9 @@ public class RecipeService {
 
   @Transactional
   public void deleteRecipe(Long id) {
-    Recipe recipe = recipeRepository.findById(id).orElseThrow();
+
+    Recipe recipe = recipeRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", id));
 
     Dish dish = recipe.getDish();
     if (dish != null) {
@@ -158,11 +174,14 @@ public class RecipeService {
 
   @Transactional
   public Recipe addIngredients(Long recipeId, List<RecipeIngredientRequestDto> ingredientsDto) {
-    Recipe recipe = recipeRepository.findById(recipeId)
-        .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
 
-    for (RecipeIngredientRequestDto dto : ingredientsDto) {
-      saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
+    Recipe recipe = recipeRepository.findById(recipeId)
+        .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", recipeId));
+
+    if (ingredientsDto != null) {
+      for (RecipeIngredientRequestDto dto : ingredientsDto) {
+        saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
+      }
     }
 
     recipeCache.evictById(recipeId);
@@ -172,8 +191,13 @@ public class RecipeService {
   }
 
   private void saveIngredient(Recipe recipe, Long productId, Double quantity) {
-    Product product = productRepository.findById(productId).orElseThrow(
-        () -> new EntityNotFoundException("Product with id " + productId + " not found"));
+
+    if (quantity == null || quantity <= 0) {
+      throw new InvalidDataException("quantity", quantity, "must be > 0");
+    }
+
+    Product product = productRepository.findById(productId)
+        .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
     Ingredient ingredient = new Ingredient();
     ingredient.setRecipe(recipe);

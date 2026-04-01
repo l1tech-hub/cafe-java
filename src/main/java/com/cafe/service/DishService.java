@@ -3,11 +3,14 @@ package com.cafe.service;
 import com.cafe.dto.DishDto;
 import com.cafe.entity.Dish;
 import com.cafe.entity.Recipe;
+import com.cafe.exception.InvalidDataException;
+import com.cafe.exception.ResourceInUseException;
+import com.cafe.exception.ResourceNotFoundException;
 import com.cafe.mapper.DishMapper;
 import com.cafe.repository.DishRepository;
 import com.cafe.repository.RecipeRepository;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +29,13 @@ public class DishService {
   @Transactional
   public DishDto create(DishDto dto) {
 
+    validateDish(dto);
+
     Recipe recipe = null;
 
     if (dto.getRecipeId() != null) {
       recipe = recipeRepository.findById(dto.getRecipeId())
-          .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+          .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", dto.getRecipeId()));
     }
 
     Dish dish = DishMapper.toEntity(dto, recipe);
@@ -45,7 +50,7 @@ public class DishService {
   public DishDto getById(Long id) {
 
     Dish dish = dishRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Dish not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", id));
 
     return DishMapper.toDto(dish);
   }
@@ -61,8 +66,10 @@ public class DishService {
   @Transactional
   public DishDto update(Long id, DishDto dto) {
 
+    validateDish(dto);
+
     Dish dish = dishRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Dish not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", id));
 
     dish.setName(dto.getName());
     dish.setPrice(dto.getPrice());
@@ -70,7 +77,8 @@ public class DishService {
 
     if (dto.getRecipeId() != null) {
       Recipe newRecipe = recipeRepository.findById(dto.getRecipeId())
-          .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+          .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", dto.getRecipeId()));
+
 
       Recipe oldRecipe = dish.getRecipe();
       if (oldRecipe != null && !oldRecipe.getId().equals(newRecipe.getId())) {
@@ -91,7 +99,15 @@ public class DishService {
   }
 
   @Transactional
-  public void delete(Long id) {
+  public void delete(@NonNull Long id) {
+
+    Dish dish = dishRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", id));
+
+    if (dish.getRecipe() != null) {
+      throw new ResourceInUseException("Dish", "delete", "it has an associated recipe");
+    }
+
     dishRepository.deleteById(id);
   }
 
@@ -101,5 +117,16 @@ public class DishService {
         .stream()
         .map(DishMapper::toDto)
         .toList();
+  }
+
+  private void validateDish(DishDto dto) {
+
+    if (dto.getPrice() < 0) {
+      throw new InvalidDataException("price", dto.getPrice(), "must be >= 0");
+    }
+
+    if (dto.getWeight() <= 0) {
+      throw new InvalidDataException("weight", dto.getWeight(), "must be > 0");
+    }
   }
 }

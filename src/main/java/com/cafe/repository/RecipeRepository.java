@@ -21,9 +21,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
   @EntityGraph(attributePaths = {"dish", "ingredients"})
   @Query("""
-        SELECT r FROM Recipe r
-        WHERE (:dishId IS NULL OR r.dish.id = :dishId)
-    """)
+          SELECT r FROM Recipe r
+          WHERE (:dishId IS NULL OR r.dish.id = :dishId)
+      """)
   @NonNull
   Page<Recipe> findAllPageable(Pageable pageable, @Param("dishId") Long dishId);
 
