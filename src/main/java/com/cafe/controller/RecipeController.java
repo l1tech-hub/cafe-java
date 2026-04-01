@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -53,9 +54,10 @@ public class RecipeController {
 
   @GetMapping("/paged")
   public Page<RecipeDto> getAllPaged(
+      @RequestParam(required = false) Long dishId,
       @PageableDefault(size = 5, sort = "id") Pageable pageable
   ) {
-    return service.getAllPaged(pageable);
+    return service.getAllPaged(pageable, dishId);
   }
 
   @GetMapping("/{id}")

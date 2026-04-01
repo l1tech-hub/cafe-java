@@ -91,15 +91,15 @@ public class RecipeService {
     return result;
   }
 
-  public Page<RecipeDto> getAllPaged(Pageable pageable) {
-    Page<RecipeDto> cached = recipeCache.getPage(pageable);
+  public Page<RecipeDto> getAllPaged(Pageable pageable, Long dishId) {
+    Page<RecipeDto> cached = recipeCache.getPage(pageable, dishId);
     if (cached != null) {
       return cached;
     }
 
-    Page<RecipeDto> page = recipeRepository.findAllPageable(pageable).map(RecipeMapper::toDto);
+    Page<RecipeDto> page = recipeRepository.findAllPageable(pageable, dishId).map(RecipeMapper::toDto);
 
-    recipeCache.putPage(pageable, page);
+    recipeCache.putPage(pageable, page, dishId);
 
     return page;
   }

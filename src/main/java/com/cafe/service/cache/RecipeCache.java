@@ -39,12 +39,12 @@ public class RecipeCache {
     this.all = null;
   }
 
-  public Page<RecipeDto> getPage(Pageable pageable) {
-    return pages.get(new RecipeCacheKey(pageable));
+  public Page<RecipeDto> getPage(Pageable pageable, Long dishId) {
+    return pages.get(new RecipeCacheKey(pageable, dishId));
   }
 
-  public void putPage(Pageable pageable, Page<RecipeDto> page) {
-    pages.put(new RecipeCacheKey(pageable), page);
+  public void putPage(Pageable pageable, Page<RecipeDto> page, Long dishId) {
+    pages.put(new RecipeCacheKey(pageable, dishId), page);
   }
 
   public void clearAllPages() {
