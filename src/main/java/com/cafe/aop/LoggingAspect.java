@@ -22,41 +22,65 @@ public class LoggingAspect {
   public void serviceMethods() {
   }
 
+  @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
+  public void controllerMethods() {
+  }
+
   @Around("serviceMethods()")
-  public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+  public Object logServiceExecution(ProceedingJoinPoint joinPoint) throws Throwable {
     long start = System.currentTimeMillis();
-
     Object result = joinPoint.proceed();
-
+    long duration = System.currentTimeMillis() - start;
     if (log.isDebugEnabled()) {
-      long duration = System.currentTimeMillis() - start;
-      log.debug("Метод {} выполнялся {} ms",
-          joinPoint.getSignature().toShortString(),
-          duration
-      );
+      log.debug("Сервисный метод {} выполнен за {} мс", joinPoint.getSignature().toShortString(),
+          duration);
     }
-
     return result;
   }
 
-  @AfterReturning("serviceMethods()")
-  public void logSuccess(JoinPoint joinPoint) {
+  @Around("controllerMethods()")
+  public Object logControllerExecution(ProceedingJoinPoint joinPoint) throws Throwable {
+    long start = System.currentTimeMillis();
+    Object result = joinPoint.proceed();
+    long duration = System.currentTimeMillis() - start;
+
+    String str1 = joinPoint.getSignature().toShortString();
+    String str2 = Arrays.toString(joinPoint.getArgs());
+
+    log.info("Контроллерный метод {} выполнен за {} мс, аргументы: {}",
+        str1, duration, str2);
+    return result;
+  }
+
+  @AfterReturning(pointcut = "serviceMethods()", returning = "result")
+  public void logServiceSuccess(JoinPoint joinPoint, Object result) {
     if (log.isDebugEnabled()) {
-      log.debug("Метод {} с аргументами {} успешно выполнен",
-          joinPoint.getSignature().toShortString(),
-          Arrays.toString(joinPoint.getArgs())
-      );
+      log.debug("Сервисный метод {} с аргументами {} выполнен успешно",
+          joinPoint.getSignature().toShortString(), Arrays.toString(joinPoint.getArgs()));
     }
   }
 
   @AfterThrowing(pointcut = "serviceMethods()", throwing = "ex")
-  public void logError(JoinPoint joinPoint, Throwable ex) {
-    if (log.isErrorEnabled()) {
-      log.error("Ошибка в методе {} с аргументами {}",
-          joinPoint.getSignature().toShortString(),
-          Arrays.toString(joinPoint.getArgs()),
-          ex
-      );
-    }
+  public void logServiceError(JoinPoint joinPoint, Throwable ex) {
+
+    String str1 = joinPoint.getSignature().toShortString();
+    String str2 = Arrays.toString(joinPoint.getArgs());
+
+    log.error("Ошибка в сервисном методе {} с аргументами {}: {}",
+        str1, str2,
+        ex.getMessage());
+
+  }
+
+
+  @AfterThrowing(pointcut = "controllerMethods()", throwing = "ex")
+  public void logControllerError(JoinPoint joinPoint, Throwable ex) {
+
+    String str1 = joinPoint.getSignature().toShortString();
+    String str2 = Arrays.toString(joinPoint.getArgs());
+
+    log.error("Ошибка в методе контроллера {} с аргументами {}: {}",
+        str1, str2,
+        ex.getMessage());
   }
 }

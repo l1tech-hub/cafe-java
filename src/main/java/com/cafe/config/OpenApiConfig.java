@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
   @Bean
-  public OpenAPI cafeOpenAPI() {
+  public OpenAPI cafeOpenApi() {
     return new OpenAPI()
         .info(new Info()
             .title("Cafe API")

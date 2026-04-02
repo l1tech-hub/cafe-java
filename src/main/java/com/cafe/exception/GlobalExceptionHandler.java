@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex,
       HttpServletRequest request) {
 
-    log.error("RuntimeException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+    log.error("RuntimeException at {}: {}", request.getRequestURI(), ex.getMessage());
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex,
       HttpServletRequest request) {
 
-    log.error("ResourceNotFoundException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+    log.error("ResourceNotFoundException at {}: {}", request.getRequestURI(), ex.getMessage());
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleInvalidData(InvalidDataException ex,
       HttpServletRequest request) {
 
-    log.error("InvalidDataException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+    log.error("InvalidDataException at {}: {}", request.getRequestURI(), ex.getMessage());
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleResourceInUse(ResourceInUseException ex,
       HttpServletRequest request) {
 
-    log.error("ResourceInUseException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+    log.error("ResourceInUseException at {}: {}", request.getRequestURI(), ex.getMessage());
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),
@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
 
     String message = String.join("; ", errors);
 
-    log.error("Validation error at {}: {}", request.getRequestURI(), message, ex);
+    log.error("Validation error at {}: {}", request.getRequestURI(), message);
 
     ErrorResponse response = new ErrorResponse(
         LocalDateTime.now(),

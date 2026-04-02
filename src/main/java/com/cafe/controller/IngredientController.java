@@ -47,10 +47,12 @@ public class IngredientController {
       @Parameter(description = "ID рецепта", example = "1", required = true)
       @PathVariable Long recipeId,
 
-      @Parameter(description = "Количество итераций приготовления", example = "2.0", required = true)
+      @Parameter(description = "Количество итераций приготовления",
+          example = "2.0", required = true)
       @RequestParam(name = "itr") Double iterations,
 
-      @Parameter(description = "Дата приготовления (формат yyyy-MM-dd)", example = "2026-04-01", required = true)
+      @Parameter(description = "Дата приготовления (формат yyyy-MM-dd)",
+          example = "2026-04-01", required = true)
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
   ) {
     return service.getMissing(recipeId, iterations, date);
@@ -62,10 +64,12 @@ public class IngredientController {
       @Parameter(description = "ID рецепта", example = "1", required = true)
       @PathVariable Long recipeId,
 
-      @Parameter(description = "Количество итераций приготовления", example = "2.0", required = true)
+      @Parameter(description = "Количество итераций приготовления",
+          example = "2.0", required = true)
       @RequestParam(name = "itr") Double iterations,
 
-      @Parameter(description = "Дата приготовления (формат yyyy-MM-dd)", example = "2026-04-01", required = true)
+      @Parameter(description = "Дата приготовления (формат yyyy-MM-dd)",
+          example = "2026-04-01", required = true)
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
   ) {
     return service.getMissing2(recipeId, iterations, date);
