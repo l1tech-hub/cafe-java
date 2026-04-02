@@ -1,11 +1,28 @@
 package com.cafe.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "DTO недостающих ингредиентов")
 public class IngredientMissingDto {
 
+  @Schema(description = "ID ингредиента",
+      example = "1")
   private Long ingredientId;
+
+  @Schema(description = "Название продукта",
+      example = "Молоко")
   private String productName;
+
+  @Schema(description = "Требуемое количество",
+      example = "10.0")
   private Double required;
+
+  @Schema(description = "Доступное количество",
+      example = "6.0")
   private Double available;
+
+  @Schema(description = "Недостающее количество",
+      example = "4.0")
   private Double missing;
 
   public IngredientMissingDto(Long ingredientId,
@@ -60,6 +77,3 @@ public class IngredientMissingDto {
     this.missing = missing;
   }
 }
-
-
-

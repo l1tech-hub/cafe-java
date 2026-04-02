@@ -22,12 +22,11 @@ public class LoggingAspect {
   public void serviceMethods() {
   }
 
-  // Время выполнения
   @Around("serviceMethods()")
   public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
     long start = System.currentTimeMillis();
 
-    Object result = joinPoint.proceed(); // исключения НЕ ловим
+    Object result = joinPoint.proceed();
 
     if (log.isDebugEnabled()) {
       long duration = System.currentTimeMillis() - start;
@@ -40,7 +39,6 @@ public class LoggingAspect {
     return result;
   }
 
-  // Успешное выполнение
   @AfterReturning("serviceMethods()")
   public void logSuccess(JoinPoint joinPoint) {
     if (log.isDebugEnabled()) {
@@ -51,7 +49,6 @@ public class LoggingAspect {
     }
   }
 
-  // Ошибки
   @AfterThrowing(pointcut = "serviceMethods()", throwing = "ex")
   public void logError(JoinPoint joinPoint, Throwable ex) {
     if (log.isErrorEnabled()) {

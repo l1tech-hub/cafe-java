@@ -1,11 +1,32 @@
 package com.cafe.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "DTO блюда")
 public class DishDto {
 
+  @Schema(description = "ID блюда",
+      example = "1")
   private Long id;
+
+  @Schema(description = "Название блюда",
+      example = "Паста Карбонара",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private String name;
+
+  @Schema(description = "Цена блюда",
+      example = "250.0",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Double price;
+
+  @Schema(description = "Вес блюда (в граммах)",
+      example = "300.0",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Double weight;
+
+  @Schema(description = "ID рецепта",
+      example = "5",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Long recipeId;
 
   public DishDto() {

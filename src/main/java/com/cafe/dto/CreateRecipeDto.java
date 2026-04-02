@@ -1,12 +1,27 @@
 package com.cafe.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
+@Schema(description = "DTO для создания рецепта с ингредиентами")
 public class CreateRecipeDto {
 
+  @Schema(description = "Название рецепта",
+      example = "Паста Карбонара",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private String name;
+
+  @Schema(description = "Инструкции приготовления",
+      example = "Смешать ингредиенты и готовить 10 минут",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private String instructions;
+
+  @Schema(description = "ID блюда",
+      example = "5",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Long dishId;
+
+  @Schema(description = "Список ингредиентов")
   private List<IngredientDto> ingredients;
 
   public CreateRecipeDto() {

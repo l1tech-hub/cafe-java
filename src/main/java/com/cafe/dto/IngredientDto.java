@@ -1,10 +1,27 @@
 package com.cafe.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "DTO ингредиента")
 public class IngredientDto {
 
+  @Schema(description = "ID ингредиента",
+      example = "1")
   private Long id;
+
+  @Schema(description = "ID рецепта",
+      example = "5",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Long recipeId;
+
+  @Schema(description = "ID продукта",
+      example = "10",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Long productId;
+
+  @Schema(description = "Количество",
+      example = "2.5",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Double quantity;
 
   public IngredientDto() {
@@ -49,3 +66,4 @@ public class IngredientDto {
     this.quantity = quantity;
   }
 }
+

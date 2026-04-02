@@ -1,14 +1,38 @@
 package com.cafe.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 
+@Schema(description = "DTO партии продукта")
 public class BatchDto {
 
+  @Schema(description = "ID партии",
+      example = "1")
   private Long id;
+
+  @Schema(description = "ID продукта",
+      example = "10",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Long productId;
+
+  @Schema(description = "Цена за единицу",
+      example = "100.5",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Double price;
+
+  @Schema(description = "Количество",
+      example = "50.0",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private Double quantity;
+
+  @Schema(description = "Дата производства",
+      example = "2026-04-01",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private LocalDate manufactureDate;
+
+  @Schema(description = "Срок годности",
+      example = "2026-05-01",
+      requiredMode = Schema.RequiredMode.REQUIRED)
   private LocalDate expiryDate;
 
   public BatchDto() {
