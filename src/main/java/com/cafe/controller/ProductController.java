@@ -3,7 +3,6 @@ package com.cafe.controller;
 import com.cafe.dto.ProductDto;
 import com.cafe.entity.Product;
 import com.cafe.service.ProductService;
-import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,12 +25,12 @@ public class ProductController {
   }
 
   @PostMapping
-  public Product add(@RequestBody @Valid ProductDto dto) {
+  public Product add(@RequestBody ProductDto dto) {
     return service.add(dto.getName());
   }
 
   @GetMapping("/{id}")
-  public ProductDto getById(@PathVariable @Valid Long id) {
+  public ProductDto getById(@PathVariable Long id) {
     return service.getById(id);
   }
 
@@ -42,17 +41,17 @@ public class ProductController {
 
 
   @GetMapping("/search")
-  public List<Product> searchByName(@RequestParam @Valid String name) {
+  public List<Product> searchByName(@RequestParam String name) {
     return service.findByName(name);
   }
 
   @PutMapping("/{id}")
-  public ProductDto update(@PathVariable @Valid Long id, @RequestBody @Valid ProductDto dto) {
+  public ProductDto update(@PathVariable Long id, @RequestBody ProductDto dto) {
     return service.update(id, dto);
   }
 
   @DeleteMapping("/{id}")
-  public void delete(@PathVariable @Valid Long id) {
+  public void delete(@PathVariable Long id) {
     service.delete(id);
   }
 }

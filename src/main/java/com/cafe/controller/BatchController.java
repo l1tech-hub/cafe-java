@@ -2,7 +2,6 @@ package com.cafe.controller;
 
 import com.cafe.dto.BatchDto;
 import com.cafe.service.BatchService;
-import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,12 +26,12 @@ public class BatchController {
   }
 
   @PostMapping
-  public BatchDto create(@RequestBody @Valid BatchDto dto) {
+  public BatchDto create(@RequestBody BatchDto dto) {
     return service.create(dto);
   }
 
   @GetMapping("/{id}")
-  public BatchDto getById(@PathVariable @Valid Long id) {
+  public BatchDto getById(@PathVariable Long id) {
     return service.getById(id);
   }
 
@@ -42,13 +41,13 @@ public class BatchController {
   }
 
   @GetMapping("/product/{productId}")
-  public List<BatchDto> getByProduct(@PathVariable @Valid Long productId) {
+  public List<BatchDto> getByProduct(@PathVariable Long productId) {
     return service.getByProduct(productId);
   }
 
   @GetMapping("/paged")
   public Page<BatchDto> getAllPaged(
-      @PageableDefault(size = 5, sort = "id") @Valid Pageable pageable
+      @PageableDefault(size = 5, sort = "id") Pageable pageable
   ) {
     return service.getAllPaged(pageable);
   }
@@ -62,12 +61,12 @@ public class BatchController {
   }
 
   @PutMapping("/{id}")
-  public BatchDto update(@PathVariable @Valid Long id, @RequestBody @Valid BatchDto dto) {
+  public BatchDto update(@PathVariable Long id, @RequestBody BatchDto dto) {
     return service.update(id, dto);
   }
 
   @DeleteMapping("/{id}")
-  public void delete(@PathVariable @Valid Long id) {
+  public void delete(@PathVariable Long id) {
     service.delete(id);
   }
 }

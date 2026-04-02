@@ -1,10 +1,13 @@
 package com.cafe.aop;
 
-import com.cafe.exception.ServiceExecutionException;
 import java.util.Arrays;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,29 +18,48 @@ public class LoggingAspect {
 
   private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
 
-  @Around("execution(* com.cafe.service..*(..))")
-  public Object logExecutionTime(ProceedingJoinPoint joinPoint) {
+  @Pointcut("execution(* com.cafe.service..*(..))")
+  public void serviceMethods() {
+  }
+
+  // Время выполнения
+  @Around("serviceMethods()")
+  public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
     long start = System.currentTimeMillis();
 
-    try {
-      Object result = joinPoint.proceed();
+    Object result = joinPoint.proceed(); // исключения НЕ ловим
 
-      if (log.isDebugEnabled()) {
-        long duration = System.currentTimeMillis() - start;
-        log.debug("Метод {} с аргументами {} выполнялся {} ms",
-            joinPoint.getSignature(),
-            Arrays.toString(joinPoint.getArgs()),
-            duration);
-      }
+    if (log.isDebugEnabled()) {
+      long duration = System.currentTimeMillis() - start;
+      log.debug("Метод {} выполнялся {} ms",
+          joinPoint.getSignature().toShortString(),
+          duration
+      );
+    }
 
-      return result;
+    return result;
+  }
 
-    } catch (Throwable ex) {
-      String msg = String.format("Ошибка в методе %s с аргументами %s",
-          joinPoint.getSignature(),
-          Arrays.toString(joinPoint.getArgs()));
+  // Успешное выполнение
+  @AfterReturning("serviceMethods()")
+  public void logSuccess(JoinPoint joinPoint) {
+    if (log.isDebugEnabled()) {
+      log.debug("Метод {} с аргументами {} успешно выполнен",
+          joinPoint.getSignature().toShortString(),
+          Arrays.toString(joinPoint.getArgs())
+      );
+    }
+  }
 
-      throw new ServiceExecutionException(msg, ex);
+  // Ошибки
+  @AfterThrowing(pointcut = "serviceMethods()", throwing = "ex")
+  public void logError(JoinPoint joinPoint, Throwable ex) {
+    if (log.isErrorEnabled()) {
+      log.error("Ошибка в методе {} с аргументами {}",
+          joinPoint.getSignature().toShortString(),
+          Arrays.toString(joinPoint.getArgs()),
+          ex
+      );
     }
   }
 }

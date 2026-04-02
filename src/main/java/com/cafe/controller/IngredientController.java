@@ -3,7 +3,6 @@ package com.cafe.controller;
 import com.cafe.dto.IngredientDto;
 import com.cafe.dto.IngredientMissingDto;
 import com.cafe.service.IngredientService;
-import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,35 +27,35 @@ public class IngredientController {
   }
 
   @PostMapping
-  public IngredientDto add(@RequestBody @Valid IngredientDto dto) {
+  public IngredientDto add(@RequestBody IngredientDto dto) {
     return service.add(dto);
   }
 
   @GetMapping("/recipe/{recipeId}")
-  public List<IngredientDto> getByRecipe(@PathVariable @Valid Long recipeId) {
+  public List<IngredientDto> getByRecipe(@PathVariable  Long recipeId) {
     return service.getByRecipe(recipeId);
   }
 
   @GetMapping("/recipe/{recipeId}/missing")
   public List<IngredientMissingDto> getMissing(
-      @PathVariable @Valid Long recipeId,
-      @RequestParam(name = "itr") @Valid Double iterations,
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @Valid LocalDate date
+      @PathVariable Long recipeId,
+      @RequestParam(name = "itr") Double iterations,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
   ) {
     return service.getMissing(recipeId, iterations, date);
   }
 
   @GetMapping("/recipe/{recipeId}/missing2")
   public List<IngredientMissingDto> getMissing2(
-      @PathVariable @Valid Long recipeId,
-      @RequestParam(name = "itr") @Valid Double iterations,
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @Valid LocalDate date
+      @PathVariable Long recipeId,
+      @RequestParam(name = "itr") Double iterations,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
   ) {
     return service.getMissing2(recipeId, iterations, date);
   }
 
   @DeleteMapping("/{id}")
-  public void delete(@PathVariable @Valid Long id) {
+  public void delete(@PathVariable Long id) {
     service.delete(id);
   }
 }
