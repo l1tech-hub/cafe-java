@@ -172,6 +172,30 @@ public class RecipeService {
     recipeCache.clearAll();
   }
 
+
+  private Ingredient toIngredient(Recipe recipe, RecipeIngredientRequestDto dto) {
+
+    if (dto.getProductId() == null) {
+      throw new InvalidDataException("Product id must not be null", null, "");
+    }
+
+    if (dto.getQuantity() == null || dto.getQuantity() <= 0) {
+      throw new InvalidDataException("quantity", dto.getQuantity(), "must be > 0");
+    }
+
+    Product product = productRepository.findById(dto.getProductId())
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Product not found", "id", dto.getProductId()
+        ));
+
+    Ingredient ingredient = new Ingredient();
+    ingredient.setRecipe(recipe);
+    ingredient.setProduct(product);
+    ingredient.setQuantity(dto.getQuantity());
+
+    return ingredient;
+  }
+
   @Transactional
   public Recipe addIngredients(Long recipeId, List<RecipeIngredientRequestDto> ingredientsDto) {
 
@@ -179,9 +203,9 @@ public class RecipeService {
         .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", recipeId));
 
     if (ingredientsDto != null) {
-      for (RecipeIngredientRequestDto dto : ingredientsDto) {
-        saveIngredient(recipe, dto.getProductId(), dto.getQuantity());
-      }
+      ingredientsDto.stream()
+          .map(dto -> toIngredient(recipe, dto))
+          .forEach(ingredientRepository::save);
     }
 
     recipeCache.evictById(recipeId);
