@@ -485,21 +485,21 @@ class IngredientServiceTest {
 
   @Test
   void shouldPassWhenQuantityNull() {
-    IngredientDto dto = new IngredientDto();
-    dto.setQuantity(null);
-    dto.setProductId(1L);
-    dto.setRecipeId(1L);
+    IngredientDto dtoNull = new IngredientDto();
+    dtoNull.setQuantity(null);
+    dtoNull.setProductId(1L);
+    dtoNull.setRecipeId(1L);
 
-    Product product = new Product();
-    Recipe recipe = new Recipe();
-    Ingredient ingredient = new Ingredient();
-    ingredient.setProduct(product);
-    ingredient.setRecipe(recipe);
+    Product productNull = new Product();
+    Recipe recipeNull = new Recipe();
+    Ingredient ingredientNull = new Ingredient();
+    ingredientNull.setProduct(productNull);
+    ingredientNull.setRecipe(recipeNull);
 
-    when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
-    when(repository.save(any())).thenReturn(ingredient);
+    when(productRepository.findById(1L)).thenReturn(Optional.of(productNull));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipeNull));
+    when(repository.save(any())).thenReturn(ingredientNull);
 
-    assertDoesNotThrow(() -> service.add(dto));
+    assertDoesNotThrow(() -> service.add(dtoNull));
   }
 }

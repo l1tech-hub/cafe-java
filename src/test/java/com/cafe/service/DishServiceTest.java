@@ -294,11 +294,11 @@ class DishServiceTest {
   void shouldNotDetachWhenSameRecipe() {
     Long recipeId = 1L;
 
-    Recipe recipe = new Recipe();
-    recipe.setId(recipeId);
+    Recipe recipeSame = new Recipe();
+    recipeSame.setId(recipeId);
 
-    Dish dish = new Dish();
-    dish.setRecipe(recipe);
+    Dish dishSame = new Dish();
+    dishSame.setRecipe(recipeSame);
 
     DishDto dto = new DishDto();
     dto.setName("test");
@@ -306,18 +306,18 @@ class DishServiceTest {
     dto.setWeight(1.0);
     dto.setRecipeId(recipeId);
 
-    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
-    when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dishSame));
+    when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipeSame));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
     service.update(1L, dto);
 
-    assertEquals(recipe, dish.getRecipe());
+    assertEquals(recipeSame, dishSame.getRecipe());
   }
 
   @Test
   void shouldDoNothingWhenRecipeNullAndOldRecipeNull() {
-    Dish dish = new Dish(); // без рецепта
+    Dish nullRecipeDish = new Dish(); // без рецепта
 
     DishDto dto = new DishDto();
     dto.setName("test");
@@ -325,24 +325,24 @@ class DishServiceTest {
     dto.setWeight(1.0);
     dto.setRecipeId(null);
 
-    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(nullRecipeDish));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
     service.update(1L, dto);
 
-    assertNull(dish.getRecipe());
+    assertNull(nullRecipeDish.getRecipe());
   }
 
   @Test
   void shouldPassWhenWeightPositive_update() {
-    Dish dish = new Dish();
+    Dish dishLocal = new Dish();
 
     DishDto dto = new DishDto();
     dto.setName("test");
     dto.setPrice(10.0);
     dto.setWeight(1.0); // граница
 
-    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dishLocal));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
     assertDoesNotThrow(() -> service.update(1L, dto));
@@ -350,7 +350,8 @@ class DishServiceTest {
 
   @Test
   void shouldCoverNullRecipeIdAndNullOldRecipe() {
-    Dish dish = new Dish();
+
+    Dish nullRecipeDish = new Dish();
 
     DishDto dto = new DishDto();
     dto.setName("x");
@@ -358,17 +359,17 @@ class DishServiceTest {
     dto.setWeight(1.0);
     dto.setRecipeId(null);
 
-    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(nullRecipeDish));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
     service.update(1L, dto);
 
-    assertNull(dish.getRecipe());
+    assertNull(nullRecipeDish.getRecipe());
   }
 
   @Test
   void shouldCoverNullOldRecipeBranch() {
-    Dish dish = new Dish();
+    Dish nullRecipeDish = new Dish();
 
     Recipe newRecipe = new Recipe();
     newRecipe.setId(2L);
@@ -379,13 +380,13 @@ class DishServiceTest {
     dto.setWeight(1.0);
     dto.setRecipeId(2L);
 
-    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(nullRecipeDish));
     when(recipeRepository.findById(2L)).thenReturn(Optional.of(newRecipe));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
     service.update(1L, dto);
 
-    assertEquals(newRecipe, dish.getRecipe());
+    assertEquals(newRecipe, nullRecipeDish.getRecipe());
   }
 }
 

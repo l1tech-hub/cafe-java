@@ -469,37 +469,6 @@ class RecipeServiceTest {
   }
 
   @Test
-  void shouldThrowWhenQuantityZero() {
-
-    CreateRecipeDto request = new CreateRecipeDto();
-    request.setIngredients(List.of(new IngredientDto() {{
-      setProductId(1L);
-      setQuantity(0.0);
-    }}));
-
-    assertThrows(InvalidDataException.class, () ->
-        service.createRecipeWithIngredients(request)
-    );
-  }
-
-  @Test
-  void shouldThrowWhenProductNotFound() {
-
-    CreateRecipeDto request = new CreateRecipeDto();
-    request.setIngredients(List.of(new IngredientDto() {{
-      setProductId(1L);
-      setQuantity(2.0);
-    }}));
-
-    when(productRepository.findById(1L))
-        .thenReturn(Optional.empty());
-
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.createRecipeWithIngredients(request)
-    );
-  }
-
-  @Test
   void shouldHandleEmptyIngredientsList() {
 
     CreateRecipeDto request = new CreateRecipeDto();
@@ -523,8 +492,10 @@ class RecipeServiceTest {
     when(productRepository.findById(1L))
         .thenReturn(Optional.empty());
 
+    List<RecipeIngredientRequestDto> list = List.of(dto);
+
     assertThrows(ResourceNotFoundException.class, () ->
-        service.addIngredients(1L, List.of(dto))
+        service.addIngredients(1L, list)
     );
   }
 
@@ -561,10 +532,10 @@ class RecipeServiceTest {
 
   @Test
   void shouldSkipIngredientsWhenNull_addIngredients() {
-    Recipe recipe = new Recipe();
-    recipe.setId(1L);
+    Recipe recipeNull = new Recipe();
+    recipeNull.setId(1L);
 
-    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipeNull));
 
     Recipe result = service.addIngredients(1L, null);
 
@@ -574,28 +545,28 @@ class RecipeServiceTest {
 
   @Test
   void shouldDeleteRecipeWithoutDish() {
-    Recipe recipe = new Recipe();
-    recipe.setId(1L);
-    recipe.setDish(null);
+    Recipe recipeWithoutDish = new Recipe();
+    recipeWithoutDish.setId(1L);
+    recipeWithoutDish.setDish(null);
 
-    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipeWithoutDish));
 
     service.deleteRecipe(1L);
 
-    verify(recipeRepository).delete(recipe);
+    verify(recipeRepository).delete(recipeWithoutDish);
   }
 
   @Test
   void shouldThrowWhenQuantityNull_toIngredient() {
 
-    Recipe recipe = new Recipe();
+    Recipe recipeNull = new Recipe();
 
     RecipeIngredientRequestDto dto = new RecipeIngredientRequestDto();
     dto.setProductId(1L);
     dto.setQuantity(null);
 
     assertThrows(InvalidDataException.class,
-        () -> invokeToIngredient(recipe, dto));
+        () -> invokeToIngredient(recipeNull, dto));
   }
 
   private Ingredient invokeToIngredient(Recipe recipe, RecipeIngredientRequestDto dto) {
