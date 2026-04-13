@@ -56,4 +56,8 @@ public class Product {
     batches.add(batch);
     batch.setProduct(this);
   }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 }
