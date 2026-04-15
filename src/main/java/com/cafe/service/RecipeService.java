@@ -1,5 +1,7 @@
 package com.cafe.service;
 
+import static com.cafe.mapper.RecipeMapper.toDto;
+
 import com.cafe.dto.CreateRecipeDto;
 import com.cafe.dto.IngredientDto;
 import com.cafe.dto.RecipeDto;
@@ -57,7 +59,7 @@ public class RecipeService {
 
     recipeCache.clearAll();
 
-    return RecipeMapper.toDto(saved);
+    return toDto(saved);
   }
 
   @Transactional
@@ -123,7 +125,7 @@ public class RecipeService {
     Recipe recipe = recipeRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", id));
 
-    RecipeDto dto = RecipeMapper.toDto(recipe);
+    RecipeDto dto = toDto(recipe);
     recipeCache.putById(id, dto);
 
     return dto;
@@ -152,7 +154,7 @@ public class RecipeService {
     recipeCache.clearAllList();
 
     Recipe saved = recipeRepository.save(recipe);
-    return RecipeMapper.toDto(saved);
+    return toDto(saved);
   }
 
   @Transactional
@@ -197,7 +199,7 @@ public class RecipeService {
   }
 
   @Transactional
-  public Recipe addIngredients(Long recipeId, List<RecipeIngredientRequestDto> ingredientsDto) {
+  public RecipeDto addIngredients(Long recipeId, List<RecipeIngredientRequestDto> ingredientsDto) {
 
     Recipe recipe = recipeRepository.findById(recipeId)
         .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", recipeId));
@@ -211,7 +213,10 @@ public class RecipeService {
     recipeCache.evictById(recipeId);
     recipeCache.clearAll();
 
-    return recipe;
+    Recipe updatedRecipe = recipeRepository.findById(recipeId)
+        .orElseThrow(() -> new ResourceNotFoundException(RECIPE_MSG, "id", recipeId));
+
+    return toDto(updatedRecipe);
   }
 
   private void saveIngredient(Recipe recipe, Long productId, Double quantity) {

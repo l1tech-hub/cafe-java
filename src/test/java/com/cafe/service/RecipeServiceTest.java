@@ -537,7 +537,7 @@ class RecipeServiceTest {
 
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipeNull));
 
-    Recipe result = service.addIngredients(1L, null);
+    RecipeDto result = service.addIngredients(1L, null);
 
     assertNotNull(result);
     verifyNoInteractions(ingredientRepository);

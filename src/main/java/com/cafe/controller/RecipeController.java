@@ -46,7 +46,7 @@ public class RecipeController {
 
   @Operation(summary = "Добавить ингредиенты к рецепту")
   @PostMapping("/{id}/ingredients")
-  public Recipe addIngredients(
+  public RecipeDto addIngredients(
       @PathVariable Long id,
       @RequestBody List<RecipeIngredientRequestDto> ingredients
   ) {
