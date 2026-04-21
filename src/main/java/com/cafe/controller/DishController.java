@@ -1,10 +1,18 @@
 package com.cafe.controller;
 
 import com.cafe.dto.DishDto;
+import com.cafe.service.CookingAsyncService;
+import com.cafe.service.CookingMetricsService;
 import com.cafe.service.DishService;
+import com.cafe.task.TaskStatus;
+import com.cafe.task.TaskStore;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +29,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class DishController {
 
   private final DishService service;
+  private final CookingAsyncService asyncService;
+  private final TaskStore taskStore;
+  private final CookingMetricsService metricsService;
 
-  public DishController(DishService service) {
+  public DishController(DishService service,
+      CookingAsyncService asyncService,
+      TaskStore taskStore, CookingMetricsService metricsService) {
     this.service = service;
+    this.asyncService = asyncService;
+    this.taskStore = taskStore;
+    this.metricsService = metricsService;
   }
 
   @Operation(summary = "Создать блюдо")
@@ -60,5 +76,53 @@ public class DishController {
   @GetMapping("/search")
   public List<DishDto> search(@RequestParam String name) {
     return service.searchByName(name);
+  }
+
+  @Operation(summary = "Запустить приготовление блюда (асинхронно)")
+  @PostMapping("/{id}/cook")
+  public String cook(@PathVariable Long id,
+      @RequestParam(defaultValue = "false") boolean allowExpiredProducts) {
+
+    String taskId = UUID.randomUUID().toString();
+
+    TaskStatus task = new TaskStatus(taskId, TaskStatus.Status.CREATED, null);
+    taskStore.save(task);
+
+    asyncService.cookAsync(taskId, id, allowExpiredProducts);
+
+    return taskId;
+  }
+
+  @Operation(summary = "Получить статус задачи приготовления")
+  @GetMapping("/tasks/{taskId}")
+  public TaskStatus getTaskStatus(@PathVariable String taskId) {
+    return taskStore.get(taskId);
+  }
+
+  @Operation(summary = "Демонстрация race condition")
+  @GetMapping("/race-demo")
+  public String raceConditionDemo(@RequestParam(defaultValue = "1000") int tasks)
+      throws InterruptedException {
+
+    ExecutorService executor = Executors.newFixedThreadPool(50);
+
+    Long dishId = 1L;
+
+    for (int i = 0; i < tasks; i++) {
+      executor.submit(() -> {
+        metricsService.unsafeIncrement(dishId);
+        metricsService.increment(dishId);
+      });
+    }
+
+    executor.shutdown();
+    executor.awaitTermination(1, TimeUnit.MINUTES);
+
+    int unsafe = metricsService.getUnsafe(dishId);
+    int safe = metricsService.getCount(dishId);
+
+    return "Expected=" + tasks +
+        ", unsafe=" + unsafe +
+        ", safe=" + safe;
   }
 }

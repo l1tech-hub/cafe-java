@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface BatchRepository extends JpaRepository<Batch, Long> {
 
@@ -13,4 +14,11 @@ public interface BatchRepository extends JpaRepository<Batch, Long> {
   Page<Batch> findByProductId(Long productId, Pageable pageable);
 
   Page<Batch> findAll(Pageable pageable);
+
+  @Query("""
+          SELECT b FROM Batch b
+          WHERE b.product.id = :productId
+          ORDER BY b.expiryDate ASC
+      """)
+  List<Batch> findByProductIdOrderByExpiryDateAsc(Long productId);
 }

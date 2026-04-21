@@ -1,14 +1,21 @@
 package com.cafe.service;
 
 import com.cafe.dto.DishDto;
+import com.cafe.entity.Batch;
 import com.cafe.entity.Dish;
+import com.cafe.entity.Ingredient;
 import com.cafe.entity.Recipe;
+import com.cafe.exception.ExpiredProductsNotAllowedException;
+import com.cafe.exception.InsufficientQuantityException;
 import com.cafe.exception.InvalidDataException;
 import com.cafe.exception.ResourceInUseException;
 import com.cafe.exception.ResourceNotFoundException;
 import com.cafe.mapper.DishMapper;
+import com.cafe.repository.BatchRepository;
 import com.cafe.repository.DishRepository;
 import com.cafe.repository.RecipeRepository;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -19,11 +26,17 @@ public class DishService {
 
   private final DishRepository dishRepository;
   private final RecipeRepository recipeRepository;
+  private final BatchRepository batchRepository;
+  private final CookingMetricsService metricsService;
 
   public DishService(DishRepository dishRepository,
-      RecipeRepository recipeRepository) {
+      RecipeRepository recipeRepository,
+      BatchRepository batchRepository,
+      CookingMetricsService metricsService) {
     this.dishRepository = dishRepository;
     this.recipeRepository = recipeRepository;
+    this.batchRepository = batchRepository;
+    this.metricsService = metricsService;
   }
 
   @Transactional
@@ -117,6 +130,92 @@ public class DishService {
         .stream()
         .map(DishMapper::toDto)
         .toList();
+  }
+
+
+  @Transactional
+  public void cook(@NonNull Long dishId, boolean allowExpiredProducts) {
+  
+    Dish dish = dishRepository.findById(dishId)
+        .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", dishId));
+  
+    Recipe recipe = dish.getRecipe();
+  
+    if (recipe == null) {
+      throw new InvalidDataException("recipe", null, "Dish has no recipe");
+    }
+  
+    LocalDate today = LocalDate.now();
+  
+    for (Ingredient ingredient : recipe.getIngredients()) {
+  
+      double required = ingredient.getQuantity();
+  
+      List<Batch> allBatches = batchRepository
+          .findByProductIdOrderByExpiryDateAsc(ingredient.getProduct().getId());
+  
+      List<Batch> expired = new ArrayList<>();
+      List<Batch> valid = new ArrayList<>();
+  
+      for (Batch batch : allBatches) {
+  
+        if (batch.getQuantity() <= 0) {
+          continue;
+        }
+  
+        if (batch.getExpiryDate().isBefore(today)) {
+          expired.add(batch);
+        } else {
+          valid.add(batch);
+        }
+      }
+  
+      List<Batch> ordered = new ArrayList<>();
+  
+      if (allowExpiredProducts) {
+        ordered.addAll(expired);
+        ordered.addAll(valid);
+      } else {
+        ordered.addAll(valid);
+        ordered.addAll(expired);
+      }
+  
+      double remaining = required;
+      boolean usedExpired = false;
+  
+      for (Batch batch : ordered) {
+  
+        if (remaining <= 0) {
+          break;
+        }
+  
+        double available = batch.getQuantity();
+        if (available <= 0) {
+          continue;
+        }
+  
+        boolean isExpired = batch.getExpiryDate().isBefore(today);
+  
+        if (isExpired) {
+          usedExpired = true;
+        }
+  
+        double used = Math.min(available, remaining);
+  
+        batch.setQuantity(available - used);
+        remaining -= used;
+      }
+  
+      if (remaining > 0) {
+        throw new InsufficientQuantityException(ingredient.getProduct().getName(), remaining);
+      }
+  
+      if (!allowExpiredProducts && usedExpired) {
+        throw new ExpiredProductsNotAllowedException(ingredient.getProduct().getName());
+      }
+    }
+  
+    metricsService.increment(dishId);
   }
 
   private void validateDish(DishDto dto) {
