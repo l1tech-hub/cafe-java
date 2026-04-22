@@ -92,7 +92,6 @@ public class DishService {
       Recipe newRecipe = recipeRepository.findById(dto.getRecipeId())
           .orElseThrow(() -> new ResourceNotFoundException("Recipe", "id", dto.getRecipeId()));
 
-
       Recipe oldRecipe = dish.getRecipe();
       if (oldRecipe != null && !oldRecipe.getId().equals(newRecipe.getId())) {
         oldRecipe.setDish(null);
@@ -132,90 +131,123 @@ public class DishService {
         .toList();
   }
 
-
   @Transactional
   public void cook(@NonNull Long dishId, boolean allowExpiredProducts) {
-  
+
     Dish dish = dishRepository.findById(dishId)
         .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", dishId));
-  
+
     Recipe recipe = dish.getRecipe();
-  
     if (recipe == null) {
       throw new InvalidDataException("recipe", null, "Dish has no recipe");
     }
-  
+
     LocalDate today = LocalDate.now();
-  
+
     for (Ingredient ingredient : recipe.getIngredients()) {
-  
-      double required = ingredient.getQuantity();
-  
-      List<Batch> allBatches = batchRepository
-          .findByProductIdOrderByExpiryDateAsc(ingredient.getProduct().getId());
-  
-      List<Batch> expired = new ArrayList<>();
-      List<Batch> valid = new ArrayList<>();
-  
-      for (Batch batch : allBatches) {
-  
-        if (batch.getQuantity() <= 0) {
-          continue;
-        }
-  
-        if (batch.getExpiryDate().isBefore(today)) {
-          expired.add(batch);
+      cookIngredient(ingredient, today, allowExpiredProducts);
+    }
+
+    metricsService.increment(dishId);
+  }
+
+  private void cookIngredient(Ingredient ingredient,
+      LocalDate today,
+      boolean allowExpiredProducts) {
+
+    double required = ingredient.getQuantity();
+
+    List<Batch> batches = getOrderedBatches(
+        ingredient.getProduct().getId(),
+        today,
+        allowExpiredProducts
+    );
+
+    ConsumptionResult result = consume(batches, required, today);
+
+    if (result.remaining > 0) {
+      throw new InsufficientQuantityException(
+          ingredient.getProduct().getName(),
+          result.remaining
+      );
+    }
+
+    if (!allowExpiredProducts && result.usedExpired) {
+      throw new ExpiredProductsNotAllowedException(
+          ingredient.getProduct().getName()
+      );
+    }
+  }
+
+  private List<Batch> getOrderedBatches(Long productId,
+      LocalDate today,
+      boolean allowExpiredProducts) {
+
+    List<Batch> all = batchRepository
+        .findByProductIdOrderByExpiryDateAsc(productId);
+
+    List<Batch> valid = new ArrayList<>();
+    List<Batch> expired = new ArrayList<>();
+
+    for (Batch b : all) {
+      if (b.getQuantity() > 0) {
+        if (b.getExpiryDate().isBefore(today)) {
+          expired.add(b);
         } else {
-          valid.add(batch);
+          valid.add(b);
         }
       }
-  
-      List<Batch> ordered = new ArrayList<>();
-  
-      if (allowExpiredProducts) {
-        ordered.addAll(expired);
-        ordered.addAll(valid);
-      } else {
-        ordered.addAll(valid);
-        ordered.addAll(expired);
-      }
-  
-      double remaining = required;
-      boolean usedExpired = false;
-  
-      for (Batch batch : ordered) {
-  
-        if (remaining <= 0) {
-          break;
-        }
-  
-        double available = batch.getQuantity();
-        if (available <= 0) {
-          continue;
-        }
-  
-        boolean isExpired = batch.getExpiryDate().isBefore(today);
-  
-        if (isExpired) {
+    }
+
+    List<Batch> result = new ArrayList<>();
+
+    if (allowExpiredProducts) {
+      result.addAll(expired);
+      result.addAll(valid);
+    } else {
+      result.addAll(valid);
+      result.addAll(expired);
+    }
+
+    return result;
+  }
+
+  private ConsumptionResult consume(List<Batch> batches,
+      double required,
+      LocalDate today) {
+
+    double remaining = required;
+    boolean usedExpired = false;
+
+    for (Batch batch : batches) {
+
+      double available = batch.getQuantity();
+
+      if (remaining > 0 && available > 0) {
+
+        if (batch.getExpiryDate().isBefore(today)) {
           usedExpired = true;
         }
-  
+
         double used = Math.min(available, remaining);
-  
+
         batch.setQuantity(available - used);
         remaining -= used;
       }
-  
-      if (remaining > 0) {
-        throw new InsufficientQuantityException(ingredient.getProduct().getName(), remaining);
-      }
-  
-      if (!allowExpiredProducts && usedExpired) {
-        throw new ExpiredProductsNotAllowedException(ingredient.getProduct().getName());
-      }
     }
-  
-    metricsService.increment(dishId);
+
+    return new ConsumptionResult(remaining, usedExpired);
+  }
+
+  private static class ConsumptionResult {
+
+    final double remaining;
+    final boolean usedExpired;
+
+    ConsumptionResult(double remaining, boolean usedExpired) {
+      this.remaining = remaining;
+      this.usedExpired = usedExpired;
+    }
   }
 
   private void validateDish(DishDto dto) {

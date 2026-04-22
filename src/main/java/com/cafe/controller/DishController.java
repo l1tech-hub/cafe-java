@@ -33,9 +33,8 @@ public class DishController {
   private final TaskStore taskStore;
   private final CookingMetricsService metricsService;
 
-  public DishController(DishService service,
-      CookingAsyncService asyncService,
-      TaskStore taskStore, CookingMetricsService metricsService) {
+  public DishController(DishService service, CookingAsyncService asyncService, TaskStore taskStore,
+      CookingMetricsService metricsService) {
     this.service = service;
     this.asyncService = asyncService;
     this.taskStore = taskStore;
@@ -99,30 +98,30 @@ public class DishController {
     return taskStore.get(taskId);
   }
 
-  @Operation(summary = "Демонстрация race condition")
   @GetMapping("/race-demo")
   public String raceConditionDemo(@RequestParam(defaultValue = "1000") int tasks)
       throws InterruptedException {
 
-    ExecutorService executor = Executors.newFixedThreadPool(50);
-
     Long dishId = 1L;
 
-    for (int i = 0; i < tasks; i++) {
-      executor.submit(() -> {
-        metricsService.unsafeIncrement(dishId);
-        metricsService.increment(dishId);
-      });
-    }
+    try (ExecutorService executor = Executors.newFixedThreadPool(50)) {
 
-    executor.shutdown();
-    executor.awaitTermination(1, TimeUnit.MINUTES);
+      for (int i = 0; i < tasks; i++) {
+        executor.submit(() -> {
+          metricsService.unsafeIncrement(dishId);
+          metricsService.increment(dishId);
+        });
+      }
+
+      executor.shutdown();
+      if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+        executor.shutdownNow();
+      }
+    }
 
     int unsafe = metricsService.getUnsafe(dishId);
     int safe = metricsService.getCount(dishId);
 
-    return "Expected=" + tasks +
-        ", unsafe=" + unsafe +
-        ", safe=" + safe;
+    return "Expected=" + tasks + ", unsafe=" + unsafe + ", safe=" + safe;
   }
 }
