@@ -1,7 +1,9 @@
 package com.cafe.controller;
 
 import com.cafe.dto.BatchOrder;
+import com.cafe.dto.DishCookStatDto;
 import com.cafe.dto.DishDto;
+import com.cafe.dto.ProductSpentDto;
 import com.cafe.service.CookingAsyncService;
 import com.cafe.service.CookingMetricsService;
 import com.cafe.service.DishService;
@@ -48,28 +50,10 @@ public class DishController {
     return service.create(dto);
   }
 
-  @Operation(summary = "Получить блюдо по ID")
-  @GetMapping("/{id}")
-  public DishDto getById(@PathVariable Long id) {
-    return service.getById(id);
-  }
-
   @Operation(summary = "Получить все блюда")
   @GetMapping
   public List<DishDto> getAll() {
     return service.getAll();
-  }
-
-  @Operation(summary = "Обновить блюдо")
-  @PutMapping("/{id}")
-  public DishDto update(@PathVariable Long id, @RequestBody DishDto dto) {
-    return service.update(id, dto);
-  }
-
-  @Operation(summary = "Удалить блюдо")
-  @DeleteMapping("/{id}")
-  public void delete(@PathVariable Long id) {
-    service.delete(id);
   }
 
   @Operation(summary = "Поиск блюд по названию")
@@ -78,26 +62,16 @@ public class DishController {
     return service.searchByName(name);
   }
 
-  @Operation(summary = "Запустить приготовление блюда (асинхронно)")
-  @PostMapping("/{id}/cook")
-  public String cook(@PathVariable Long id,
-      @RequestParam(defaultValue = "false") boolean allowExpiredProducts,
-      @RequestParam(defaultValue = "EXPIRY_ASC") BatchOrder batchOrder) {
-
-    String taskId = UUID.randomUUID().toString();
-
-    TaskStatus task = new TaskStatus(taskId, TaskStatus.Status.CREATED, null);
-    taskStore.save(task);
-
-    asyncService.cookAsync(taskId, id, allowExpiredProducts, batchOrder);
-
-    return taskId;
+  @Operation(summary = "Статистика приготовленных блюд (из БД)")
+  @GetMapping("/cooking-statistics")
+  public List<DishCookStatDto> getCookingStatistics() {
+    return metricsService.listCookStatistics();
   }
 
-  @Operation(summary = "Получить статус задачи приготовления")
-  @GetMapping("/tasks/{taskId}")
-  public TaskStatus getTaskStatus(@PathVariable String taskId) {
-    return taskStore.get(taskId);
+  @Operation(summary = "Потраченные продукты (кг) по рецептам и числу приготовлений")
+  @GetMapping("/spent-products")
+  public List<ProductSpentDto> getSpentProductsKilograms() {
+    return metricsService.listSpentProductsKilograms();
   }
 
   @GetMapping("/race-demo")
@@ -125,5 +99,45 @@ public class DishController {
     int safe = metricsService.getCount(dishId);
 
     return "Expected=" + tasks + ", unsafe=" + unsafe + ", safe=" + safe;
+  }
+
+  @Operation(summary = "Получить статус задачи приготовления")
+  @GetMapping("/tasks/{taskId}")
+  public TaskStatus getTaskStatus(@PathVariable String taskId) {
+    return taskStore.get(taskId);
+  }
+
+  @Operation(summary = "Получить блюдо по ID")
+  @GetMapping("/{id:\\d+}")
+  public DishDto getById(@PathVariable Long id) {
+    return service.getById(id);
+  }
+
+  @Operation(summary = "Обновить блюдо")
+  @PutMapping("/{id:\\d+}")
+  public DishDto update(@PathVariable Long id, @RequestBody DishDto dto) {
+    return service.update(id, dto);
+  }
+
+  @Operation(summary = "Удалить блюдо")
+  @DeleteMapping("/{id:\\d+}")
+  public void delete(@PathVariable Long id) {
+    service.delete(id);
+  }
+
+  @Operation(summary = "Запустить приготовление блюда (асинхронно)")
+  @PostMapping("/{id:\\d+}/cook")
+  public String cook(@PathVariable Long id,
+      @RequestParam(defaultValue = "false") boolean allowExpiredProducts,
+      @RequestParam(defaultValue = "EXPIRY_ASC") BatchOrder batchOrder) {
+
+    String taskId = UUID.randomUUID().toString();
+
+    TaskStatus task = new TaskStatus(taskId, TaskStatus.Status.CREATED, null);
+    taskStore.save(task);
+
+    asyncService.cookAsync(taskId, id, allowExpiredProducts, batchOrder);
+
+    return taskId;
   }
 }

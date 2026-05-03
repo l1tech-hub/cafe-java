@@ -47,7 +47,7 @@ public class ProductController {
 
   @Operation(summary = "Поиск продуктов по названию")
   @GetMapping("/search")
-  public List<Product> searchByName(@RequestParam String name) {
+  public List<ProductDto> searchByName(@RequestParam String name) {
     return service.findByName(name);
   }
 

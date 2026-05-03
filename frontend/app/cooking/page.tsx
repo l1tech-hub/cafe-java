@@ -179,7 +179,12 @@ export default function CookingPage() {
 
       const blocks: MissingBlock[] = [];
       for (const [recipeId, { iterations, dishes: dishLabels }] of byRecipe) {
-        const rows = await ingredientsApi.getMissing(recipeId, iterations, date);
+        const rows = await ingredientsApi.getMissing(
+          recipeId,
+          iterations,
+          date,
+          allowExpiredProducts
+        );
         blocks.push({
           recipeId,
           dishSummary: [...new Set(dishLabels)].join(", "),

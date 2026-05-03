@@ -26,7 +26,7 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
           FROM Ingredient i
           JOIN i.product p
           LEFT JOIN p.batches b
-              ON b.expiryDate >= :cookingDate
+              ON (b.expiryDate >= :cookingDate OR :allowExpiredProducts = true)
           WHERE i.recipe.id = :recipeId
           GROUP BY i.id, p.name, i.quantity
           HAVING COALESCE(SUM(b.quantity), 0.0) < (i.quantity * :iterations)
@@ -34,7 +34,8 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
   List<IngredientMissingDto> findMissingIngredients(
       @Param("recipeId") Long recipeId,
       @Param("iterations") Double iterations,
-      @Param("cookingDate") LocalDate cookingDate
+      @Param("cookingDate") LocalDate cookingDate,
+      @Param("allowExpiredProducts") boolean allowExpiredProducts
   );
 
   @Query(value = """
@@ -48,7 +49,7 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
           INNER JOIN product p ON i.product_id = p.id
           LEFT JOIN batch b
               ON b.product_id = p.id
-             AND b.expiry_date >= :cookingDate
+             AND (b.expiry_date >= :cookingDate OR :allowExpiredProducts = true)
           WHERE i.recipe_id = :recipeId
           GROUP BY i.id, p.name, i.quantity
           HAVING COALESCE(SUM(b.quantity), 0.0) < (i.quantity * :iterations)
@@ -56,7 +57,8 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
   List<IngredientMissingProjection> findMissingIngredients2(
       @Param("recipeId") Long recipeId,
       @Param("iterations") Double iterations,
-      @Param("cookingDate") LocalDate cookingDate
+      @Param("cookingDate") LocalDate cookingDate,
+      @Param("allowExpiredProducts") boolean allowExpiredProducts
   );
 
   boolean existsByProductId(Long productId);

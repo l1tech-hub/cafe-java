@@ -9,7 +9,9 @@ import type {
   CreateRecipeRequest,
   CreateIngredientRequest,
   CreateBatchRequest,
+  DishCookStat,
   DishCookTaskStatus,
+  ProductSpent,
   IngredientMissing,
   BatchOrder,
   RecipeCostEstimate,
@@ -48,7 +50,6 @@ async function fetchApi<T>(
   return text as T;
 }
 
-// Dishes API
 export const dishesApi = {
   getAll: () => fetchApi<Dish[]>("/dishes"),
   getById: (id: number) => fetchApi<Dish>(`/dishes/${id}`),
@@ -75,9 +76,12 @@ export const dishesApi = {
     ),
   getCookTaskStatus: (taskId: string) =>
     fetchApi<DishCookTaskStatus>(`/dishes/tasks/${taskId}`),
+  getCookingStatistics: () =>
+    fetchApi<DishCookStat[]>("/dishes/cooking-statistics"),
+  getSpentProductsKilograms: () =>
+    fetchApi<ProductSpent[]>("/dishes/spent-products"),
 };
 
-// Products API
 export const productsApi = {
   getAll: () => fetchApi<Product[]>("/products"),
   getById: (id: number) => fetchApi<Product>(`/products/${id}`),
@@ -97,7 +101,6 @@ export const productsApi = {
     fetchApi<Product[]>(`/products/search?name=${encodeURIComponent(name)}`),
 };
 
-// Recipes API
 export const recipesApi = {
   getAll: () => fetchApi<Recipe[]>("/recipes"),
   getById: (id: number) => fetchApi<Recipe>(`/recipes/${id}`),
@@ -129,28 +132,44 @@ export const recipesApi = {
     ),
 };
 
-// Ingredients API
 export const ingredientsApi = {
   getByRecipe: (recipeId: number) =>
     fetchApi<Ingredient[]>(`/ingredients/recipe/${recipeId}`),
-  getMissing: (recipeId: number, iterations: number, date: string) =>
-    fetchApi<IngredientMissing[]>(
-      `/ingredients/recipe/${recipeId}/missing?itr=${encodeURIComponent(
-        String(iterations)
-      )}&date=${encodeURIComponent(date)}`
-    ),
+  getMissing: (
+    recipeId: number,
+    iterations: number,
+    date: string,
+    allowExpiredProducts?: boolean
+  ) => {
+    const params = new URLSearchParams({
+      itr: String(iterations),
+      date,
+    });
+    if (allowExpiredProducts) params.set("allowExpired", "true");
+    return fetchApi<IngredientMissing[]>(
+      `/ingredients/recipe/${recipeId}/missing?${params.toString()}`
+    );
+  },
   create: (recipeId: number, data: CreateIngredientRequest) =>
-    fetchApi<Ingredient>(`/ingredients?recipeId=${recipeId}`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+      fetchApi<Ingredient>(`/ingredients`, {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          recipeId: recipeId,
+        }),
+      }),
   delete: (id: number) =>
     fetchApi<void>(`/ingredients/${id}`, { method: "DELETE" }),
 };
 
-// Batches API
 export const batchesApi = {
   getAll: () => fetchApi<Batch[]>("/batches"),
+  getExpired: (asOfDate?: string) => {
+    const q = asOfDate
+      ? `?asOf=${encodeURIComponent(asOfDate)}`
+      : "";
+    return fetchApi<Batch[]>(`/batches/expired${q}`);
+  },
   getById: (id: number) => fetchApi<Batch>(`/batches/${id}`),
   create: (data: CreateBatchRequest) =>
     fetchApi<Batch>("/batches", {

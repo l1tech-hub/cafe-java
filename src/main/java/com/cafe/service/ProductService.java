@@ -52,13 +52,16 @@ public class ProductService {
         .toList();
   }
 
-  public List<Product> findByName(String name) {
+  public List<ProductDto> findByName(String name) {
 
     if (name != null && name.isBlank()) {
       throw new InvalidDataException("name", name, "must not be blank");
     }
 
-    return repository.findByNameContainingIgnoreCase(name);
+    return repository.findByNameContainingIgnoreCase(name)
+        .stream()
+        .map(ProductMapper::toDto)
+        .toList();
   }
 
   public ProductDto update(Long id, ProductDto dto) {

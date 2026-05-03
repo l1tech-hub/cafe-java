@@ -229,7 +229,7 @@ export default function ProductsPage() {
     <div className="flex flex-col">
       <PageHeader
         title="Продукты"
-        description="Управление продуктами и их партиями (OneToMany)"
+        description="Управление продуктами и их партиями"
       >
         <Button onClick={openCreateDialog}>
           <Plus className="mr-2 h-4 w-4" />
@@ -283,7 +283,6 @@ export default function ProductsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12"></TableHead>
-                  <TableHead>ID</TableHead>
                   <TableHead>Название</TableHead>
                   <TableHead>Партии</TableHead>
                   <TableHead className="text-right">Действия</TableHead>
@@ -306,7 +305,6 @@ export default function ProductsPage() {
                           )}
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{product.id}</TableCell>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>
                         <span className="rounded-full bg-muted px-2 py-1 text-xs">
@@ -332,7 +330,7 @@ export default function ProductsPage() {
                     </TableRow>
                     {expandedProduct === product.id && (
                       <TableRow>
-                        <TableCell colSpan={5} className="bg-muted/50 p-4">
+                        <TableCell colSpan={4} className="bg-muted/50 p-4">
                           <div className="space-y-2">
                             <h4 className="font-medium">
                               Партии продукта
@@ -350,6 +348,9 @@ export default function ProductsPage() {
                               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 {productBatches[product.id].map((batch) => {
                                   const status = getBatchStatus(batch.expiryDate);
+                                  const mfgLabel = new Date(
+                                    batch.manufactureDate
+                                  ).toLocaleDateString("ru");
                                   return (
                                     <div
                                       key={batch.id}
@@ -357,7 +358,7 @@ export default function ProductsPage() {
                                     >
                                       <div className="flex items-center justify-between">
                                         <span className="font-medium">
-                                          Партия #{batch.id}
+                                          произв. {mfgLabel}
                                         </span>
                                         <div className="flex items-center gap-2">
                                           <span

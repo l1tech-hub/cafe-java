@@ -8,6 +8,21 @@ export interface Dish {
   recipeId: number | null;
 }
 
+export interface DishCookStat {
+  dishId: number;
+  dishName: string;
+  cookCount: number;
+  dishPrice: number | null;
+  dishWeightGrams: number | null;
+  totalIterationsPrice: number | null;
+  totalPortionsMassKilograms: number | null;
+}
+
+export interface ProductSpent {
+  productName: string;
+  spentKilograms: number;
+}
+
 export interface Product {
   id: number;
   name: string;

@@ -1,6 +1,7 @@
 package com.cafe.repository;
 
 import com.cafe.entity.Batch;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,14 @@ public interface BatchRepository extends JpaRepository<Batch, Long> {
           ORDER BY b.expiryDate ASC
       """)
   List<Batch> findByProductIdOrderByExpiryDateAsc(Long productId);
+
+  @Query("""
+          SELECT b FROM Batch b
+          JOIN FETCH b.product p
+          WHERE b.expiryDate < :asOfDate
+            AND b.quantity IS NOT NULL
+            AND b.quantity > 0
+          ORDER BY b.expiryDate ASC, b.id ASC
+      """)
+  List<Batch> findExpiredWithProduct(LocalDate asOfDate);
 }

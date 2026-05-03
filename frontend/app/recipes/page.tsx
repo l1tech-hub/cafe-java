@@ -241,7 +241,7 @@ export default function RecipesPage() {
     <div className="flex flex-col">
       <PageHeader
         title="Рецепты"
-        description="Управление рецептами и связь OneToMany с ингредиентами"
+        description="Управление рецептами и ингредиентами"
       >
         <Button onClick={openCreateDialog}>
           <Plus className="mr-2 h-4 w-4" />
@@ -271,9 +271,8 @@ export default function RecipesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ID</TableHead>
                       <TableHead>Название</TableHead>
-                      <TableHead>Блюдо (OneToOne)</TableHead>
+                      <TableHead>Блюдо</TableHead>
                       <TableHead>Ингредиенты</TableHead>
                       <TableHead className="text-right">Действия</TableHead>
                     </TableRow>
@@ -288,10 +287,7 @@ export default function RecipesPage() {
                             selectedRecipe?.id === recipe.id ? "bg-muted/50" : ""
                           }
                         >
-                          <TableCell className="font-medium">
-                            {recipe.id}
-                          </TableCell>
-                          <TableCell>{recipe.name}</TableCell>
+                          <TableCell className="font-medium">{recipe.name}</TableCell>
                           <TableCell>
                             {dishName ? (
                               <span className="rounded-md bg-secondary px-2 py-1 text-sm">
@@ -364,11 +360,10 @@ export default function RecipesPage() {
           )}
         </div>
 
-        {/* Ingredients Panel (OneToMany relationship display) */}
         {selectedRecipe && (
           <div className="w-96 border-l bg-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">OneToMany: Ингредиенты</h3>
+              <h3 className="font-semibold">Ингредиенты</h3>
               <Button
                 variant="ghost"
                 size="icon"
@@ -472,7 +467,7 @@ export default function RecipesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dish">Блюдо (OneToOne связь)</Label>
+                <Label htmlFor="dish">Блюдо</Label>
                 <Select
                   value={formData.dishId}
                   onValueChange={(value) =>
@@ -517,7 +512,7 @@ export default function RecipesPage() {
           <form onSubmit={handleAddIngredient}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="product">Продукт (ManyToOne)</Label>
+                <Label htmlFor="product">Продукт</Label>
                 <Select
                   value={ingredientForm.productId}
                   onValueChange={(value) =>

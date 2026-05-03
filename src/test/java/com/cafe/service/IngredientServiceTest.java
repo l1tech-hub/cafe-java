@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -324,11 +325,11 @@ class IngredientServiceTest {
     when(recipeRepository.existsById(1L))
         .thenReturn(true);
 
-    when(repository.findMissingIngredients(any(), any(), any()))
+    when(repository.findMissingIngredients(any(), any(), any(), anyBoolean()))
         .thenReturn(List.of());
 
     List<IngredientMissingDto> result =
-        service.getMissing(1L, 2.0, LocalDate.now());
+        service.getMissing(1L, 2.0, LocalDate.now(), false);
 
     assertNotNull(result);
   }
@@ -339,7 +340,7 @@ class IngredientServiceTest {
     LocalDate date = LocalDate.now();
 
     assertThrows(InvalidDataException.class, () ->
-        service.getMissing(null, 0.0, date)
+        service.getMissing(null, 0.0, date, false)
     );
   }
 
@@ -352,11 +353,11 @@ class IngredientServiceTest {
     when(recipeRepository.existsById(1L))
         .thenReturn(true);
 
-    when(repository.findMissingIngredients2(any(), any(), any()))
+    when(repository.findMissingIngredients2(any(), any(), any(), anyBoolean()))
         .thenReturn(List.of());
 
     List<IngredientMissingDto> result =
-        service.getMissing2(1L, 2.0, LocalDate.now());
+        service.getMissing2(1L, 2.0, LocalDate.now(), false);
 
     assertNotNull(result);
   }
@@ -373,7 +374,7 @@ class IngredientServiceTest {
     LocalDate date = LocalDate.now();
 
     assertThrows(ResourceNotFoundException.class, () ->
-        service.getMissing(1L, 2.0, date)
+        service.getMissing(1L, 2.0, date, false)
     );
   }
 
@@ -392,11 +393,11 @@ class IngredientServiceTest {
     when(p.getAvailable()).thenReturn(5.0);
     when(p.getMissing()).thenReturn(5.0);
 
-    when(repository.findMissingIngredients2(any(), any(), any()))
+    when(repository.findMissingIngredients2(any(), any(), any(), anyBoolean()))
         .thenReturn(List.of(p));
 
     List<IngredientMissingDto> result =
-        service.getMissing2(1L, 2.0, LocalDate.now());
+        service.getMissing2(1L, 2.0, LocalDate.now(), false);
 
     assertEquals(1, result.size());
   }
@@ -416,10 +417,10 @@ class IngredientServiceTest {
     when(p.getAvailable()).thenReturn(5.0);
     when(p.getMissing()).thenReturn(5.0);
 
-    when(repository.findMissingIngredients2(recipeId, iterations, date))
+    when(repository.findMissingIngredients2(recipeId, iterations, date, false))
         .thenReturn(List.of(p));
 
-    var result = service.getMissing2(recipeId, iterations, date);
+    var result = service.getMissing2(recipeId, iterations, date, false);
 
     assertEquals(1, result.size());
   }
@@ -431,7 +432,7 @@ class IngredientServiceTest {
     LocalDate date = LocalDate.now();
 
     assertThrows(ResourceNotFoundException.class,
-        () -> service.getMissing2(1L, 1.0, date));
+        () -> service.getMissing2(1L, 1.0, date, false));
   }
 
 
@@ -443,18 +444,18 @@ class IngredientServiceTest {
     LocalDate date = LocalDate.now();
 
     assertThrows(InvalidDataException.class,
-        () -> service.getMissing2(1L, 0.0, date));
+        () -> service.getMissing2(1L, 0.0, date, false));
   }
 
   @Test
   void shouldWorkWhenRecipeIdIsNull_getMissing2() {
-    when(repository.findMissingIngredients2(null, 1.0, LocalDate.now()))
+    when(repository.findMissingIngredients2(null, 1.0, LocalDate.now(), false))
         .thenReturn(List.of());
 
 
     LocalDate date = LocalDate.now();
 
-    var result = service.getMissing2(null, 1.0, date);
+    var result = service.getMissing2(null, 1.0, date, false);
 
     assertTrue(result.isEmpty());
   }
@@ -462,11 +463,11 @@ class IngredientServiceTest {
   @Test
   void shouldWorkWhenIterationsNull_getMissing() {
     when(recipeRepository.existsById(1L)).thenReturn(true);
-    when(repository.findMissingIngredients(1L, null, LocalDate.now()))
+    when(repository.findMissingIngredients(1L, null, LocalDate.now(), false))
         .thenReturn(List.of());
 
     List<IngredientMissingDto> result =
-        service.getMissing(1L, null, LocalDate.now());
+        service.getMissing(1L, null, LocalDate.now(), false);
 
     assertNotNull(result);
   }
@@ -474,11 +475,11 @@ class IngredientServiceTest {
   @Test
   void shouldWorkWhenIterationsNull_getMissing2() {
     when(recipeRepository.existsById(1L)).thenReturn(true);
-    when(repository.findMissingIngredients2(1L, null, LocalDate.now()))
+    when(repository.findMissingIngredients2(1L, null, LocalDate.now(), false))
         .thenReturn(List.of());
 
     List<IngredientMissingDto> result =
-        service.getMissing2(1L, null, LocalDate.now());
+        service.getMissing2(1L, null, LocalDate.now(), false);
 
     assertNotNull(result);
   }

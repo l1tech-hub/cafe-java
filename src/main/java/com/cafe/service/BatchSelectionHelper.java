@@ -25,10 +25,7 @@ public final class BatchSelectionHelper {
     batches.sort(cmp);
   }
 
-  /**
-   * Порядок списания партий при готовке (как в DishService): приоритет просрочки задаётся флагом,
-   * внутри каждой группы — сортировка по {@code order}.
-   */
+
   public static List<Batch> orderForCooking(
       List<Batch> positiveQuantityBatches,
       LocalDate today,
