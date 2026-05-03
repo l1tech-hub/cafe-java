@@ -9,14 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CookingMetricsService {
 
-  // unsafe
   private final Map<Long, Integer> unsafeCounters = new HashMap<>();
 
-  // safe
   private final Map<Long, AtomicInteger> dishCounters = new ConcurrentHashMap<>();
 
 
-  // unsafe
   public void unsafeIncrement(Long dishId) {
     Integer current = unsafeCounters.getOrDefault(dishId, 0);
     unsafeCounters.put(dishId, current + 1);
@@ -27,7 +24,6 @@ public class CookingMetricsService {
   }
 
 
-  // safe
   public void increment(Long dishId) {
     dishCounters
         .computeIfAbsent(dishId, id -> new AtomicInteger(0))

@@ -26,7 +26,7 @@ public class CookingAsyncService {
     task.setStatus(TaskStatus.Status.RUNNING);
 
     try {
-      Thread.sleep(7000);
+      Thread.sleep(12000);
 
       dishService.cook(dishId, allowExpiredProducts);
 
