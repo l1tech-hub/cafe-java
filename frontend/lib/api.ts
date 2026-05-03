@@ -9,7 +9,9 @@ import type {
   CreateRecipeRequest,
   CreateIngredientRequest,
   CreateBatchRequest,
+  DishCookStat,
   DishCookTaskStatus,
+  ProductSpent,
   IngredientMissing,
   BatchOrder,
   RecipeCostEstimate,
@@ -75,6 +77,10 @@ export const dishesApi = {
     ),
   getCookTaskStatus: (taskId: string) =>
     fetchApi<DishCookTaskStatus>(`/dishes/tasks/${taskId}`),
+  getCookingStatistics: () =>
+    fetchApi<DishCookStat[]>("/dishes/cooking-statistics"),
+  getSpentProductsKilograms: () =>
+    fetchApi<ProductSpent[]>("/dishes/spent-products"),
 };
 
 // Products API
@@ -133,12 +139,21 @@ export const recipesApi = {
 export const ingredientsApi = {
   getByRecipe: (recipeId: number) =>
     fetchApi<Ingredient[]>(`/ingredients/recipe/${recipeId}`),
-  getMissing: (recipeId: number, iterations: number, date: string) =>
-    fetchApi<IngredientMissing[]>(
-      `/ingredients/recipe/${recipeId}/missing?itr=${encodeURIComponent(
-        String(iterations)
-      )}&date=${encodeURIComponent(date)}`
-    ),
+  getMissing: (
+    recipeId: number,
+    iterations: number,
+    date: string,
+    allowExpiredProducts?: boolean
+  ) => {
+    const params = new URLSearchParams({
+      itr: String(iterations),
+      date,
+    });
+    if (allowExpiredProducts) params.set("allowExpired", "true");
+    return fetchApi<IngredientMissing[]>(
+      `/ingredients/recipe/${recipeId}/missing?${params.toString()}`
+    );
+  },
   create: (recipeId: number, data: CreateIngredientRequest) =>
     fetchApi<Ingredient>(`/ingredients?recipeId=${recipeId}`, {
       method: "POST",
@@ -151,6 +166,12 @@ export const ingredientsApi = {
 // Batches API
 export const batchesApi = {
   getAll: () => fetchApi<Batch[]>("/batches"),
+  getExpired: (asOfDate?: string) => {
+    const q = asOfDate
+      ? `?asOf=${encodeURIComponent(asOfDate)}`
+      : "";
+    return fetchApi<Batch[]>(`/batches/expired${q}`);
+  },
   getById: (id: number) => fetchApi<Batch>(`/batches/${id}`),
   create: (data: CreateBatchRequest) =>
     fetchApi<Batch>("/batches", {

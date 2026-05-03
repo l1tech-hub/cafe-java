@@ -35,17 +35,21 @@ public class BatchDto {
       requiredMode = Schema.RequiredMode.REQUIRED)
   private LocalDate expiryDate;
 
+  @Schema(description = "Название продукта (для отображения)")
+  private String productName;
+
   public BatchDto() {
   }
 
   public BatchDto(Long id, Long productId, Double price, Double quantity,
-      LocalDate manufactureDate, LocalDate expiryDate) {
+      LocalDate manufactureDate, LocalDate expiryDate, String productName) {
     this.id = id;
     this.productId = productId;
     this.price = price;
     this.quantity = quantity;
     this.manufactureDate = manufactureDate;
     this.expiryDate = expiryDate;
+    this.productName = productName;
   }
 
   public Long getId() {
@@ -94,5 +98,13 @@ public class BatchDto {
 
   public void setQuantity(Double quantity) {
     this.quantity = quantity;
+  }
+
+  public String getProductName() {
+    return productName;
+  }
+
+  public void setProductName(String productName) {
+    this.productName = productName;
   }
 }

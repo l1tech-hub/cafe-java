@@ -36,12 +36,13 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { dishesApi, recipesApi } from "@/lib/api";
-import type { Dish, Recipe } from "@/lib/types";
+import { dishesApi, recipesApi, productsApi } from "@/lib/api";
+import type { Dish, Product, Recipe } from "@/lib/types";
 
 export default function DishesPage() {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -64,12 +65,14 @@ export default function DishesPage() {
   async function loadData() {
     try {
       setLoading(true);
-      const [dishesData, recipesData] = await Promise.all([
+      const [dishesData, recipesData, productsData] = await Promise.all([
         dishesApi.getAll(),
         recipesApi.getAll(),
+        productsApi.getAll(),
       ]);
       setDishes(dishesData);
       setRecipes(recipesData);
+      setProducts(productsData);
     } catch (error) {
       console.error("Failed to load data:", error);
     } finally {
@@ -98,6 +101,10 @@ export default function DishesPage() {
     return recipes.find((r) => r.id === recipeId)?.name ?? null;
   }
 
+  function getProductName(productId: number) {
+    return products.find((p) => p.id === productId)?.name ?? `Продукт #${productId}`;
+  }
+
   async function toggleRecipe(dish: Dish) {
     if (!dish.recipeId) return;
     if (expandedDish === dish.id) {
@@ -121,7 +128,7 @@ export default function DishesPage() {
       name: "",
       price: "",
       weight: "",
-      recipeId: "",
+      recipeId: "none",
     });
     setDialogOpen(true);
   }
@@ -132,7 +139,7 @@ export default function DishesPage() {
       name: dish.name,
       price: dish.price.toString(),
       weight: dish.weight.toString(),
-      recipeId: dish.recipeId?.toString() ?? "",
+      recipeId: dish.recipeId != null ? String(dish.recipeId) : "none",
     });
     setDialogOpen(true);
   }
@@ -149,7 +156,10 @@ export default function DishesPage() {
         name: formData.name,
         price: parseFloat(formData.price),
         weight: parseFloat(formData.weight),
-        recipeId: formData.recipeId ? parseInt(formData.recipeId) : undefined,
+        recipeId:
+          formData.recipeId && formData.recipeId !== "none"
+            ? parseInt(formData.recipeId, 10)
+            : undefined,
       };
       if (editingDish) {
         await dishesApi.update(editingDish.id, data);
@@ -179,7 +189,7 @@ export default function DishesPage() {
     <div className="flex flex-col">
       <PageHeader
         title="Блюда"
-        description="Управление блюдами и связь OneToOne с рецептами"
+        description="Управление блюдами и рецептами"
       >
         <Button onClick={openCreateDialog}>
           <Plus className="mr-2 h-4 w-4" />
@@ -232,12 +242,11 @@ export default function DishesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                      <TableHead className="w-12"></TableHead>
-                    <TableHead>ID</TableHead>
+                    <TableHead className="w-12"></TableHead>
                     <TableHead>Название</TableHead>
                     <TableHead>Цена</TableHead>
                     <TableHead>Вес</TableHead>
-                      <TableHead>Рецепт и ингредиенты</TableHead>
+                    <TableHead>Рецепт и ингредиенты</TableHead>
                     <TableHead className="text-right">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -262,8 +271,7 @@ export default function DishesPage() {
                                 )}
                               </Button>
                             </TableCell>
-                            <TableCell className="font-medium">{dish.id}</TableCell>
-                            <TableCell>{dish.name}</TableCell>
+                            <TableCell className="font-medium">{dish.name}</TableCell>
                             <TableCell>{dish.price} руб.</TableCell>
                             <TableCell>{dish.weight} г</TableCell>
                             <TableCell>
@@ -288,7 +296,7 @@ export default function DishesPage() {
                           </TableRow>
                           {expandedDish === dish.id && (
                             <TableRow>
-                              <TableCell colSpan={7} className="bg-muted/40">
+                              <TableCell colSpan={6} className="bg-muted/40">
                                 {!recipe ? (
                                   <p className="text-sm text-muted-foreground">
                                     Загрузка ингредиентов...
@@ -301,7 +309,8 @@ export default function DishesPage() {
                                   <div className="space-y-1">
                                     {recipe.ingredients.map((ingredient) => (
                                       <p key={ingredient.id} className="text-sm">
-                                        Продукт #{ingredient.productId}: {ingredient.quantity}
+                                        {getProductName(ingredient.productId)}:{" "}
+                                        {ingredient.quantity} г
                                       </p>
                                     ))}
                                   </div>
@@ -371,7 +380,7 @@ export default function DishesPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="recipe">Рецепт (OneToOne связь)</Label>
+                <Label htmlFor="recipe">Рецепт</Label>
                 <Select
                   value={formData.recipeId}
                   onValueChange={(value) =>
@@ -382,6 +391,7 @@ export default function DishesPage() {
                     <SelectValue placeholder="Выберите рецепт (опционально)" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Без рецепта</SelectItem>
                     {recipes.map((recipe) => (
                       <SelectItem key={recipe.id} value={recipe.id.toString()}>
                         {recipe.name}

@@ -8,6 +8,7 @@ import com.cafe.exception.ResourceNotFoundException;
 import com.cafe.mapper.BatchMapper;
 import com.cafe.repository.BatchRepository;
 import com.cafe.repository.ProductRepository;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +54,13 @@ public class BatchService {
   public List<BatchDto> getAll() {
 
     return batchRepository.findAll()
+        .stream()
+        .map(BatchMapper::toDto)
+        .toList();
+  }
+
+  public List<BatchDto> listExpired(LocalDate asOfDate) {
+    return batchRepository.findExpiredWithProduct(asOfDate)
         .stream()
         .map(BatchMapper::toDto)
         .toList();

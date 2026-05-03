@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RecipeCostEstimateService {
 
+  private static final double GRAMS_PER_KG = 1000.0;
+
   private final RecipeRepository recipeRepository;
   private final BatchRepository batchRepository;
 
@@ -77,8 +79,8 @@ public class RecipeCostEstimateService {
         break;
       }
       double take = Math.min(b.getQuantity(), remaining);
-      double price = b.getPrice() != null ? b.getPrice() : 0.0;
-      cost += take * price;
+      double pricePerKg = b.getPrice() != null ? b.getPrice() : 0.0;
+      cost += take * (pricePerKg / GRAMS_PER_KG);
       remaining -= take;
     }
     return cost;

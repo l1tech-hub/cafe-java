@@ -171,7 +171,7 @@ export default function BatchesPage() {
     <div className="flex flex-col">
       <PageHeader
         title="Партии"
-        description="Управление партиями продуктов (ManyToOne связь с Product)"
+        description="Управление партиями продуктов"
       >
         <Button onClick={openCreateDialog}>
           <Plus className="mr-2 h-4 w-4" />
@@ -228,7 +228,7 @@ export default function BatchesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Продукт (ManyToOne)</TableHead>
+                  <TableHead>Продукт</TableHead>
                   <TableHead>Количество</TableHead>
                   <TableHead>Цена</TableHead>
                   <TableHead>Дата производства</TableHead>
@@ -297,7 +297,7 @@ export default function BatchesPage() {
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="product">Продукт (ManyToOne)</Label>
+                <Label htmlFor="product">Продукт</Label>
                 <Select
                   value={formData.productId}
                   onValueChange={(value) =>

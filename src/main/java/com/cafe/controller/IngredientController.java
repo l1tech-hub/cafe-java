@@ -53,9 +53,13 @@ public class IngredientController {
 
       @Parameter(description = "Дата приготовления (формат yyyy-MM-dd)",
           example = "2026-04-01", required = true)
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+
+      @Parameter(description = "Учитывать просроченные партии при расчёте остатков")
+      @RequestParam(name = "allowExpired", required = false, defaultValue = "false")
+          boolean allowExpiredProducts
   ) {
-    return service.getMissing(recipeId, iterations, date);
+    return service.getMissing(recipeId, iterations, date, allowExpiredProducts);
   }
 
   @Operation(summary = "Получить недостающие ингредиенты (альтернативный метод)")
@@ -70,9 +74,13 @@ public class IngredientController {
 
       @Parameter(description = "Дата приготовления (формат yyyy-MM-dd)",
           example = "2026-04-01", required = true)
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+
+      @Parameter(description = "Учитывать просроченные партии при расчёте остатков")
+      @RequestParam(name = "allowExpired", required = false, defaultValue = "false")
+          boolean allowExpiredProducts
   ) {
-    return service.getMissing2(recipeId, iterations, date);
+    return service.getMissing2(recipeId, iterations, date, allowExpiredProducts);
   }
 
   @Operation(summary = "Удалить ингредиент")

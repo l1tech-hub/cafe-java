@@ -124,9 +124,10 @@ class ProductServiceTest {
     when(repository.findByNameContainingIgnoreCase("milk"))
         .thenReturn(List.of(product));
 
-    List<Product> result = service.findByName("milk");
+    List<ProductDto> result = service.findByName("milk");
 
     assertEquals(1, result.size());
+    assertEquals(product.getName(), result.getFirst().getName());
   }
 
   @Test
@@ -143,7 +144,7 @@ class ProductServiceTest {
     when(repository.findByNameContainingIgnoreCase(null))
         .thenReturn(List.of(product));
 
-    List<Product> result = service.findByName(null);
+    List<ProductDto> result = service.findByName(null);
 
     assertEquals(1, result.size());
   }

@@ -122,7 +122,7 @@ export default function IngredientsPage() {
     <div className="flex flex-col">
       <PageHeader
         title="Ингредиенты"
-        description="Визуализация ManyToMany связи между рецептами и продуктами"
+        description="Связи продуктов с рецептами"
       >
         <Button onClick={openCreateDialog}>
           <Plus className="mr-2 h-4 w-4" />
@@ -137,12 +137,11 @@ export default function IngredientsPage() {
           </div>
         ) : (
           <>
-            {/* ManyToMany Visualization */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Layers className="h-5 w-5" />
-                  ManyToMany: Продукты в Рецептах
+                  Продукты в рецептах
                 </CardTitle>
               </CardHeader>
               <CardContent>

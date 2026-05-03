@@ -17,7 +17,8 @@ public class BatchMapper {
         batch.getPrice(),
         batch.getQuantity(),
         batch.getManufactureDate(),
-        batch.getExpiryDate()
+        batch.getExpiryDate(),
+        batch.getProduct().getName()
     );
   }
 

@@ -97,7 +97,8 @@ public class IngredientService {
     repository.delete(ingredient);
   }
 
-  public List<IngredientMissingDto> getMissing(Long recipeId, Double iterations, LocalDate date) {
+  public List<IngredientMissingDto> getMissing(Long recipeId, Double iterations, LocalDate date,
+      boolean allowExpiredProducts) {
 
     if (recipeId != null && !recipeRepository.existsById(recipeId)) {
       throw new ResourceNotFoundException("Recipe", "id", recipeId);
@@ -107,10 +108,11 @@ public class IngredientService {
       throw new InvalidDataException("iterations", iterations, "must be > 0");
     }
 
-    return repository.findMissingIngredients(recipeId, iterations, date);
+    return repository.findMissingIngredients(recipeId, iterations, date, allowExpiredProducts);
   }
 
-  public List<IngredientMissingDto> getMissing2(Long recipeId, Double iterations, LocalDate date) {
+  public List<IngredientMissingDto> getMissing2(Long recipeId, Double iterations, LocalDate date,
+      boolean allowExpiredProducts) {
 
     if (recipeId != null && !recipeRepository.existsById(recipeId)) {
       throw new ResourceNotFoundException("Recipe", "id", recipeId);
@@ -120,7 +122,8 @@ public class IngredientService {
       throw new InvalidDataException("iterations", iterations, "must be > 0");
     }
 
-    return repository.findMissingIngredients2(recipeId, iterations, date).stream()
+    return repository.findMissingIngredients2(recipeId, iterations, date, allowExpiredProducts)
+        .stream()
         .map(p -> new IngredientMissingDto(
             p.getIngredientId(),
             p.getProductName(),
