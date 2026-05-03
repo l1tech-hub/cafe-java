@@ -1,5 +1,6 @@
 package com.cafe.service;
 
+import com.cafe.dto.BatchOrder;
 import com.cafe.task.TaskStatus;
 import com.cafe.task.TaskStore;
 import java.util.concurrent.CompletableFuture;
@@ -20,15 +21,16 @@ public class CookingAsyncService {
   @Async
   public CompletableFuture<Void> cookAsync(String taskId,
       Long dishId,
-      boolean allowExpiredProducts) {
+      boolean allowExpiredProducts,
+      BatchOrder batchOrder) {
 
     TaskStatus task = taskStore.get(taskId);
     task.setStatus(TaskStatus.Status.RUNNING);
 
     try {
-      Thread.sleep(12000);
+      Thread.sleep(50);
 
-      dishService.cook(dishId, allowExpiredProducts);
+      dishService.cook(dishId, allowExpiredProducts, batchOrder);
 
       task.setStatus(TaskStatus.Status.DONE);
       task.setMessage("Cooking completed");

@@ -29,6 +29,14 @@ export interface Ingredient {
   quantity: number;
 }
 
+export interface IngredientMissing {
+  ingredientId: number;
+  productName: string;
+  required: number;
+  available: number;
+  missing: number;
+}
+
 export interface Batch {
   id: number;
   productId: number;
@@ -37,6 +45,28 @@ export interface Batch {
   quantity: number;
   manufactureDate: string;
   expiryDate: string;
+}
+
+export type CookingTaskStatus = "CREATED" | "RUNNING" | "DONE" | "FAILED";
+
+export interface DishCookTaskStatus {
+  id: string;
+  status: CookingTaskStatus;
+  message: string | null;
+}
+
+export type BatchOrder = "PRICE_ASC" | "PRICE_DESC" | "EXPIRY_ASC" | "EXPIRY_DESC";
+
+export interface RecipeCostLine {
+  ingredientId: number;
+  productName: string;
+  quantity: number;
+  cost: number;
+}
+
+export interface RecipeCostEstimate {
+  lines: RecipeCostLine[];
+  totalCost: number;
 }
 
 // Request DTOs

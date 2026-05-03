@@ -1,5 +1,6 @@
 package com.cafe.controller;
 
+import com.cafe.dto.BatchOrder;
 import com.cafe.dto.DishDto;
 import com.cafe.service.CookingAsyncService;
 import com.cafe.service.CookingMetricsService;
@@ -80,14 +81,15 @@ public class DishController {
   @Operation(summary = "Запустить приготовление блюда (асинхронно)")
   @PostMapping("/{id}/cook")
   public String cook(@PathVariable Long id,
-      @RequestParam(defaultValue = "false") boolean allowExpiredProducts) {
+      @RequestParam(defaultValue = "false") boolean allowExpiredProducts,
+      @RequestParam(defaultValue = "EXPIRY_ASC") BatchOrder batchOrder) {
 
     String taskId = UUID.randomUUID().toString();
 
     TaskStatus task = new TaskStatus(taskId, TaskStatus.Status.CREATED, null);
     taskStore.save(task);
 
-    asyncService.cookAsync(taskId, id, allowExpiredProducts);
+    asyncService.cookAsync(taskId, id, allowExpiredProducts, batchOrder);
 
     return taskId;
   }

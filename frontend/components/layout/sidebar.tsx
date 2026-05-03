@@ -6,8 +6,7 @@ import {
   UtensilsCrossed,
   Package,
   BookOpen,
-  Layers,
-  Boxes,
+  Calculator,
   LayoutDashboard,
   Coffee,
 } from "lucide-react";
@@ -15,11 +14,10 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Блюда", href: "/dishes", icon: UtensilsCrossed },
   { name: "Продукты", href: "/products", icon: Package },
   { name: "Рецепты", href: "/recipes", icon: BookOpen },
-  { name: "Ингредиенты", href: "/ingredients", icon: Layers },
-  { name: "Партии", href: "/batches", icon: Boxes },
+  { name: "Блюда", href: "/dishes", icon: UtensilsCrossed },
+  { name: "Расчёт и приготовление", href: "/cooking", icon: Calculator },
 ];
 
 export function Sidebar() {

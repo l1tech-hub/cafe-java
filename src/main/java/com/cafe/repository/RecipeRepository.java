@@ -27,7 +27,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
   @NonNull
   Page<Recipe> findAllPageable(Pageable pageable, @Param("dishId") Long dishId);
 
-  @EntityGraph(attributePaths = {"dish", "ingredients"})
+  @EntityGraph(attributePaths = {"dish", "ingredients", "ingredients.product"})
   @NonNull
   Optional<Recipe> findById(@NonNull Long id);
 

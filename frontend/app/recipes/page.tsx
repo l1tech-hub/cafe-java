@@ -49,6 +49,7 @@ export default function RecipesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ingredientDialogOpen, setIngredientDialogOpen] = useState(false);
+  const [ingredientEditDialogOpen, setIngredientEditDialogOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -62,6 +63,7 @@ export default function RecipesPage() {
     productId: "",
     quantity: "",
   });
+  const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const pageSize = 10;
@@ -205,6 +207,33 @@ export default function RecipesPage() {
       setRecipeIngredients(ingredients);
     } catch (error) {
       console.error("Failed to delete ingredient:", error);
+    }
+  }
+
+  function openEditIngredientDialog(ingredient: Ingredient) {
+    setEditingIngredient(ingredient);
+    setIngredientForm({
+      productId: ingredient.productId.toString(),
+      quantity: ingredient.quantity.toString(),
+    });
+    setIngredientEditDialogOpen(true);
+  }
+
+  async function handleEditIngredient(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedRecipe || !editingIngredient) return;
+    try {
+      await ingredientsApi.delete(editingIngredient.id);
+      await ingredientsApi.create(selectedRecipe.id, {
+        productId: parseInt(ingredientForm.productId),
+        quantity: parseFloat(ingredientForm.quantity),
+      });
+      setIngredientEditDialogOpen(false);
+      setEditingIngredient(null);
+      const ingredients = await ingredientsApi.getByRecipe(selectedRecipe.id);
+      setRecipeIngredients(ingredients);
+    } catch (error) {
+      console.error("Failed to edit ingredient:", error);
     }
   }
 
@@ -387,6 +416,13 @@ export default function RecipesPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => openEditIngredientDialog(ing)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDeleteIngredient(ing.id)}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
@@ -527,6 +563,64 @@ export default function RecipesPage() {
                 Отмена
               </Button>
               <Button type="submit">Добавить</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={ingredientEditDialogOpen}
+        onOpenChange={setIngredientEditDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Изменить ингредиент</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditIngredient}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="ingredientEditProduct">Продукт</Label>
+                <Select
+                  value={ingredientForm.productId}
+                  onValueChange={(value) =>
+                    setIngredientForm({ ...ingredientForm, productId: value })
+                  }
+                >
+                  <SelectTrigger id="ingredientEditProduct">
+                    <SelectValue placeholder="Выберите продукт" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id.toString()}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ingredientEditQuantity">Количество</Label>
+                <Input
+                  id="ingredientEditQuantity"
+                  type="number"
+                  step="0.01"
+                  value={ingredientForm.quantity}
+                  onChange={(e) =>
+                    setIngredientForm({ ...ingredientForm, quantity: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIngredientEditDialogOpen(false)}
+              >
+                Отмена
+              </Button>
+              <Button type="submit">Сохранить</Button>
             </DialogFooter>
           </form>
         </DialogContent>

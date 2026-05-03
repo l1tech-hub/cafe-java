@@ -1,13 +1,18 @@
 package com.cafe.controller;
 
+import com.cafe.dto.BatchOrder;
 import com.cafe.dto.CreateRecipeDto;
+import com.cafe.dto.RecipeCostEstimateDto;
 import com.cafe.dto.RecipeDto;
 import com.cafe.dto.RecipeIngredientRequestDto;
 import com.cafe.entity.Recipe;
+import com.cafe.service.RecipeCostEstimateService;
 import com.cafe.service.RecipeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -27,9 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecipeController {
 
   private final RecipeService service;
+  private final RecipeCostEstimateService costEstimateService;
 
-  public RecipeController(RecipeService service) {
+  public RecipeController(RecipeService service, RecipeCostEstimateService costEstimateService) {
     this.service = service;
+    this.costEstimateService = costEstimateService;
   }
 
   @Operation(summary = "Создать рецепт")
@@ -72,6 +79,16 @@ public class RecipeController {
   @GetMapping("/{id}")
   public RecipeDto getById(@PathVariable Long id) {
     return service.getById(id);
+  }
+
+  @Operation(summary = "Оценить стоимость ингредиентов (по порядку выбора партий)")
+  @GetMapping("/{id}/cost-estimate")
+  public RecipeCostEstimateDto estimateCost(
+      @PathVariable Long id,
+      @RequestParam Double itr,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+      @RequestParam(defaultValue = "EXPIRY_ASC") BatchOrder batchOrder) {
+    return costEstimateService.estimate(id, itr, date, batchOrder);
   }
 
   @Operation(summary = "Обновить рецепт")

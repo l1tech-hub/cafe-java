@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,17 @@ export default function ProductsPage() {
   const [formData, setFormData] = useState({ name: "" });
   const [expandedProduct, setExpandedProduct] = useState<number | null>(null);
   const [productBatches, setProductBatches] = useState<Record<number, Batch[]>>({});
+  const [batchDialogOpen, setBatchDialogOpen] = useState(false);
+  const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false);
+  const [editingBatch, setEditingBatch] = useState<Batch | null>(null);
+  const [batchToDelete, setBatchToDelete] = useState<Batch | null>(null);
+  const [batchProductId, setBatchProductId] = useState<number | null>(null);
+  const [batchFormData, setBatchFormData] = useState({
+    price: "",
+    quantity: "",
+    manufactureDate: "",
+    expiryDate: "",
+  });
 
   useEffect(() => {
     loadProducts();
@@ -75,14 +86,18 @@ export default function ProductsPage() {
     }
 
     if (!productBatches[productId]) {
-      try {
-        const batches = await batchesApi.getByProduct(productId);
-        setProductBatches((prev) => ({ ...prev, [productId]: batches }));
-      } catch (error) {
-        console.error("Failed to load batches:", error);
-      }
+      await loadProductBatches(productId);
     }
     setExpandedProduct(productId);
+  }
+
+  async function loadProductBatches(productId: number) {
+    try {
+      const batches = await batchesApi.getByProduct(productId);
+      setProductBatches((prev) => ({ ...prev, [productId]: batches }));
+    } catch (error) {
+      console.error("Failed to load batches:", error);
+    }
   }
 
   function openCreateDialog() {
@@ -126,6 +141,71 @@ export default function ProductsPage() {
       loadProducts();
     } catch (error) {
       console.error("Failed to delete product:", error);
+    }
+  }
+
+  function openCreateBatchDialog(productId: number) {
+    setEditingBatch(null);
+    setBatchProductId(productId);
+    setBatchFormData({
+      price: "",
+      quantity: "",
+      manufactureDate: "",
+      expiryDate: "",
+    });
+    setBatchDialogOpen(true);
+  }
+
+  function openEditBatchDialog(batch: Batch) {
+    setEditingBatch(batch);
+    setBatchProductId(batch.productId);
+    setBatchFormData({
+      price: batch.price.toString(),
+      quantity: batch.quantity.toString(),
+      manufactureDate: batch.manufactureDate.split("T")[0],
+      expiryDate: batch.expiryDate.split("T")[0],
+    });
+    setBatchDialogOpen(true);
+  }
+
+  function openDeleteBatchDialog(batch: Batch) {
+    setBatchToDelete(batch);
+    setBatchDeleteDialogOpen(true);
+  }
+
+  async function handleBatchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!batchProductId) return;
+    try {
+      const payload = {
+        productId: batchProductId,
+        price: parseFloat(batchFormData.price),
+        quantity: parseFloat(batchFormData.quantity),
+        manufactureDate: batchFormData.manufactureDate,
+        expiryDate: batchFormData.expiryDate,
+      };
+
+      if (editingBatch) {
+        await batchesApi.update(editingBatch.id, payload);
+      } else {
+        await batchesApi.create(payload);
+      }
+      setBatchDialogOpen(false);
+      await loadProductBatches(batchProductId);
+    } catch (error) {
+      console.error("Failed to save batch:", error);
+    }
+  }
+
+  async function handleDeleteBatch() {
+    if (!batchToDelete) return;
+    try {
+      await batchesApi.delete(batchToDelete.id);
+      setBatchDeleteDialogOpen(false);
+      await loadProductBatches(batchToDelete.productId);
+      setBatchToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete batch:", error);
     }
   }
 
@@ -211,7 +291,7 @@ export default function ProductsPage() {
               </TableHeader>
               <TableBody>
                 {products.map((product) => (
-                  <>
+                  <Fragment key={product.id}>
                     <TableRow key={product.id}>
                       <TableCell>
                         <Button
@@ -255,8 +335,12 @@ export default function ProductsPage() {
                         <TableCell colSpan={5} className="bg-muted/50 p-4">
                           <div className="space-y-2">
                             <h4 className="font-medium">
-                              Партии продукта (OneToMany связь)
+                              Партии продукта
                             </h4>
+                            <Button size="sm" onClick={() => openCreateBatchDialog(product.id)}>
+                              <Plus className="mr-1 h-3 w-3" />
+                              Добавить партию
+                            </Button>
                             {!productBatches[product.id] ||
                             productBatches[product.id].length === 0 ? (
                               <p className="text-sm text-muted-foreground">
@@ -275,11 +359,27 @@ export default function ProductsPage() {
                                         <span className="font-medium">
                                           Партия #{batch.id}
                                         </span>
-                                        <span
-                                          className={`rounded-full px-2 py-0.5 text-xs ${status.className}`}
-                                        >
-                                          {status.label}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                          <span
+                                            className={`rounded-full px-2 py-0.5 text-xs ${status.className}`}
+                                          >
+                                            {status.label}
+                                          </span>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => openEditBatchDialog(batch)}
+                                          >
+                                            <Pencil className="h-4 w-4" />
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => openDeleteBatchDialog(batch)}
+                                          >
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                          </Button>
+                                        </div>
                                       </div>
                                       <div className="mt-2 grid grid-cols-2 gap-1 text-sm text-muted-foreground">
                                         <span>Количество:</span>
@@ -302,7 +402,7 @@ export default function ProductsPage() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </TableBody>
             </Table>
@@ -349,6 +449,82 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={batchDialogOpen} onOpenChange={setBatchDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingBatch ? "Редактировать партию" : "Новая партия"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleBatchSubmit}>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="batchQuantity">Количество</Label>
+                  <Input
+                    id="batchQuantity"
+                    type="number"
+                    value={batchFormData.quantity}
+                    onChange={(e) =>
+                      setBatchFormData({ ...batchFormData, quantity: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="batchPrice">Цена</Label>
+                  <Input
+                    id="batchPrice"
+                    type="number"
+                    step="0.01"
+                    value={batchFormData.price}
+                    onChange={(e) =>
+                      setBatchFormData({ ...batchFormData, price: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="batchManufactureDate">Дата производства</Label>
+                  <Input
+                    id="batchManufactureDate"
+                    type="date"
+                    value={batchFormData.manufactureDate}
+                    onChange={(e) =>
+                      setBatchFormData({
+                        ...batchFormData,
+                        manufactureDate: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="batchExpiryDate">Срок годности</Label>
+                  <Input
+                    id="batchExpiryDate"
+                    type="date"
+                    value={batchFormData.expiryDate}
+                    onChange={(e) =>
+                      setBatchFormData({ ...batchFormData, expiryDate: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setBatchDialogOpen(false)}>
+                Отмена
+              </Button>
+              <Button type="submit">{editingBatch ? "Сохранить" : "Создать"}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
@@ -367,6 +543,26 @@ export default function ProductsPage() {
               Отмена
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
+              Удалить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={batchDeleteDialogOpen} onOpenChange={setBatchDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Удалить партию?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Вы уверены, что хотите удалить партию #{batchToDelete?.id}? Это действие
+            нельзя отменить.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBatchDeleteDialogOpen(false)}>
+              Отмена
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBatch}>
               Удалить
             </Button>
           </DialogFooter>

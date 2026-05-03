@@ -67,3 +67,6 @@ out/
 
 
 /config/
+
+/frontend/.next/
+/frontend/node_modules/

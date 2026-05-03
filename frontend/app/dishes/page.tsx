@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,15 +27,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Plus,
   Pencil,
   Trash2,
   Search,
   UtensilsCrossed,
-  BookOpen,
-  X,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { dishesApi, recipesApi } from "@/lib/api";
 import type { Dish, Recipe } from "@/lib/types";
@@ -49,8 +48,8 @@ export default function DishesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [dishToDelete, setDishToDelete] = useState<Dish | null>(null);
-  const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [expandedDish, setExpandedDish] = useState<number | null>(null);
+  const [recipesById, setRecipesById] = useState<Record<number, Recipe>>({});
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -99,20 +98,21 @@ export default function DishesPage() {
     return recipes.find((r) => r.id === recipeId)?.name ?? null;
   }
 
-  async function viewRecipe(dish: Dish) {
+  async function toggleRecipe(dish: Dish) {
     if (!dish.recipeId) return;
-    setSelectedDish(dish);
-    try {
-      const recipe = await recipesApi.getById(dish.recipeId);
-      setSelectedRecipe(recipe);
-    } catch (error) {
-      console.error("Failed to load recipe:", error);
+    if (expandedDish === dish.id) {
+      setExpandedDish(null);
+      return;
     }
-  }
-
-  function closeRecipePanel() {
-    setSelectedDish(null);
-    setSelectedRecipe(null);
+    if (!recipesById[dish.recipeId]) {
+      try {
+        const recipe = await recipesApi.getById(dish.recipeId);
+        setRecipesById((prev) => ({ ...prev, [recipe.id]: recipe }));
+      } catch (error) {
+        console.error("Failed to load recipe:", error);
+      }
+    }
+    setExpandedDish(dish.id);
   }
 
   function openCreateDialog() {
@@ -187,9 +187,7 @@ export default function DishesPage() {
         </Button>
       </PageHeader>
 
-      <div className="flex flex-1">
-        {/* Main content */}
-        <div className="flex-1 space-y-4 p-6">
+      <div className="flex-1 space-y-4 p-6">
           {/* Search */}
           <div className="flex gap-2">
             <div className="relative flex-1 max-w-sm">
@@ -234,114 +232,91 @@ export default function DishesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                      <TableHead className="w-12"></TableHead>
                     <TableHead>ID</TableHead>
                     <TableHead>Название</TableHead>
                     <TableHead>Цена</TableHead>
                     <TableHead>Вес</TableHead>
-                    <TableHead>Рецепт (OneToOne)</TableHead>
+                      <TableHead>Рецепт и ингредиенты</TableHead>
                     <TableHead className="text-right">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {dishes.map((dish) => {
                     const recipeName = getRecipeName(dish.recipeId);
+                      const recipe = dish.recipeId ? recipesById[dish.recipeId] : null;
                     return (
-                      <TableRow
-                        key={dish.id}
-                        className={
-                          selectedDish?.id === dish.id ? "bg-muted/50" : ""
-                        }
-                      >
-                        <TableCell className="font-medium">{dish.id}</TableCell>
-                        <TableCell>{dish.name}</TableCell>
-                        <TableCell>{dish.price} руб.</TableCell>
-                        <TableCell>{dish.weight} г</TableCell>
-                        <TableCell>
-                          {recipeName ? (
-                            <Button
-                              variant="link"
-                              className="h-auto p-0 text-primary"
-                              onClick={() => viewRecipe(dish)}
-                            >
-                              <BookOpen className="mr-1 h-4 w-4" />
-                              {recipeName}
-                            </Button>
-                          ) : (
-                            <span className="text-muted-foreground">
-                              Нет рецепта
-                            </span>
+                        <Fragment key={dish.id}>
+                          <TableRow>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => toggleRecipe(dish)}
+                                disabled={!dish.recipeId}
+                              >
+                                {expandedDish === dish.id ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </TableCell>
+                            <TableCell className="font-medium">{dish.id}</TableCell>
+                            <TableCell>{dish.name}</TableCell>
+                            <TableCell>{dish.price} руб.</TableCell>
+                            <TableCell>{dish.weight} г</TableCell>
+                            <TableCell>
+                              {recipeName ? recipeName : "Нет рецепта"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEditDialog(dish)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openDeleteDialog(dish)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                          {expandedDish === dish.id && (
+                            <TableRow>
+                              <TableCell colSpan={7} className="bg-muted/40">
+                                {!recipe ? (
+                                  <p className="text-sm text-muted-foreground">
+                                    Загрузка ингредиентов...
+                                  </p>
+                                ) : recipe.ingredients.length === 0 ? (
+                                  <p className="text-sm text-muted-foreground">
+                                    У рецепта нет ингредиентов
+                                  </p>
+                                ) : (
+                                  <div className="space-y-1">
+                                    {recipe.ingredients.map((ingredient) => (
+                                      <p key={ingredient.id} className="text-sm">
+                                        Продукт #{ingredient.productId}: {ingredient.quantity}
+                                      </p>
+                                    ))}
+                                  </div>
+                                )}
+                              </TableCell>
+                            </TableRow>
                           )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEditDialog(dish)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openDeleteDialog(dish)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                        </Fragment>
                     );
                   })}
                 </TableBody>
               </Table>
             </div>
           )}
-        </div>
 
-        {/* Recipe Panel (OneToOne relationship display) */}
-        {selectedDish && selectedRecipe && (
-          <div className="w-96 border-l bg-card p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">OneToOne: Рецепт блюда</h3>
-              <Button variant="ghost" size="icon" onClick={closeRecipePanel}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{selectedRecipe.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Для блюда: {selectedDish.name}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Инструкции</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRecipe.instructions || "Нет инструкций"}
-                  </p>
-                </div>
-                {selectedRecipe.ingredients &&
-                  selectedRecipe.ingredients.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">
-                        Ингредиенты ({selectedRecipe.ingredients.length})
-                      </h4>
-                      <ul className="space-y-1">
-                        {selectedRecipe.ingredients.map((ing) => (
-                          <li
-                            key={ing.id}
-                            className="text-sm text-muted-foreground"
-                          >
-                            Продукт #{ing.productId}: {ing.quantity} ед.
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
 
       {/* Create/Edit Dialog */}

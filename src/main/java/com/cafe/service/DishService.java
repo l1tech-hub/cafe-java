@@ -1,5 +1,6 @@
 package com.cafe.service;
 
+import com.cafe.dto.BatchOrder;
 import com.cafe.dto.DishDto;
 import com.cafe.entity.Batch;
 import com.cafe.entity.Dish;
@@ -15,7 +16,6 @@ import com.cafe.repository.BatchRepository;
 import com.cafe.repository.DishRepository;
 import com.cafe.repository.RecipeRepository;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -132,9 +132,9 @@ public class DishService {
   }
 
   @Transactional
-  public void cook(@NonNull Long dishId, boolean allowExpiredProducts) {
+  public void cook(@NonNull Long dishId, boolean allowExpiredProducts, BatchOrder batchOrder) {
 
-    Dish dish = dishRepository.findById(dishId)
+    Dish dish = dishRepository.findWithRecipeGraphById(dishId)
         .orElseThrow(() -> new ResourceNotFoundException("Dish", "id", dishId));
 
     Recipe recipe = dish.getRecipe();
@@ -145,7 +145,7 @@ public class DishService {
     LocalDate today = LocalDate.now();
 
     for (Ingredient ingredient : recipe.getIngredients()) {
-      cookIngredient(ingredient, today, allowExpiredProducts);
+      cookIngredient(ingredient, today, allowExpiredProducts, batchOrder);
     }
 
     metricsService.increment(dishId);
@@ -153,14 +153,16 @@ public class DishService {
 
   private void cookIngredient(Ingredient ingredient,
       LocalDate today,
-      boolean allowExpiredProducts) {
+      boolean allowExpiredProducts,
+      BatchOrder batchOrder) {
 
     double required = ingredient.getQuantity();
 
     List<Batch> batches = getOrderedBatches(
         ingredient.getProduct().getId(),
         today,
-        allowExpiredProducts
+        allowExpiredProducts,
+        batchOrder
     );
 
     ConsumptionResult result = consume(batches, required, today);
@@ -181,35 +183,14 @@ public class DishService {
 
   private List<Batch> getOrderedBatches(Long productId,
       LocalDate today,
-      boolean allowExpiredProducts) {
+      boolean allowExpiredProducts,
+      BatchOrder batchOrder) {
 
-    List<Batch> all = batchRepository
-        .findByProductIdOrderByExpiryDateAsc(productId);
+    List<Batch> positive = batchRepository.findByProductId(productId).stream()
+        .filter(b -> b.getQuantity() != null && b.getQuantity() > 0)
+        .toList();
 
-    List<Batch> valid = new ArrayList<>();
-    List<Batch> expired = new ArrayList<>();
-
-    for (Batch b : all) {
-      if (b.getQuantity() > 0) {
-        if (b.getExpiryDate().isBefore(today)) {
-          expired.add(b);
-        } else {
-          valid.add(b);
-        }
-      }
-    }
-
-    List<Batch> result = new ArrayList<>();
-
-    if (allowExpiredProducts) {
-      result.addAll(expired);
-      result.addAll(valid);
-    } else {
-      result.addAll(valid);
-      result.addAll(expired);
-    }
-
-    return result;
+    return BatchSelectionHelper.orderForCooking(positive, today, allowExpiredProducts, batchOrder);
   }
 
   private ConsumptionResult consume(List<Batch> batches,

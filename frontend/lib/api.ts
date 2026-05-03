@@ -9,6 +9,10 @@ import type {
   CreateRecipeRequest,
   CreateIngredientRequest,
   CreateBatchRequest,
+  DishCookTaskStatus,
+  IngredientMissing,
+  BatchOrder,
+  RecipeCostEstimate,
   Page,
 } from "./types";
 
@@ -35,7 +39,13 @@ async function fetchApi<T>(
     return undefined as T;
   }
 
-  return response.json();
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  return text as T;
 }
 
 // Dishes API
@@ -56,6 +66,15 @@ export const dishesApi = {
     fetchApi<void>(`/dishes/${id}`, { method: "DELETE" }),
   search: (name: string) =>
     fetchApi<Dish[]>(`/dishes/search?name=${encodeURIComponent(name)}`),
+  cook: (id: number, allowExpiredProducts: boolean, batchOrder: BatchOrder) =>
+    fetchApi<string>(
+      `/dishes/${id}/cook?allowExpiredProducts=${allowExpiredProducts}&batchOrder=${batchOrder}`,
+      {
+        method: "POST",
+      }
+    ),
+  getCookTaskStatus: (taskId: string) =>
+    fetchApi<DishCookTaskStatus>(`/dishes/tasks/${taskId}`),
 };
 
 // Products API
@@ -102,12 +121,24 @@ export const recipesApi = {
     if (dishId) params.append("dishId", dishId.toString());
     return fetchApi<Page<Recipe>>(`/recipes/paged?${params}`);
   },
+  getCostEstimate: (recipeId: number, itr: number, date: string, batchOrder: BatchOrder) =>
+    fetchApi<RecipeCostEstimate>(
+      `/recipes/${recipeId}/cost-estimate?itr=${encodeURIComponent(
+        String(itr)
+      )}&date=${encodeURIComponent(date)}&batchOrder=${batchOrder}`
+    ),
 };
 
 // Ingredients API
 export const ingredientsApi = {
   getByRecipe: (recipeId: number) =>
     fetchApi<Ingredient[]>(`/ingredients/recipe/${recipeId}`),
+  getMissing: (recipeId: number, iterations: number, date: string) =>
+    fetchApi<IngredientMissing[]>(
+      `/ingredients/recipe/${recipeId}/missing?itr=${encodeURIComponent(
+        String(iterations)
+      )}&date=${encodeURIComponent(date)}`
+    ),
   create: (recipeId: number, data: CreateIngredientRequest) =>
     fetchApi<Ingredient>(`/ingredients?recipeId=${recipeId}`, {
       method: "POST",
