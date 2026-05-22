@@ -80,8 +80,7 @@ class RecipeServiceTest {
 
     RecipeDto dto = new RecipeDto();
 
-    when(recipeRepository.save(any()))
-        .thenReturn(recipe);
+    when(recipeRepository.save(any())).thenReturn(recipe);
 
     RecipeDto result = service.createRecipe(dto);
 
@@ -95,11 +94,9 @@ class RecipeServiceTest {
     RecipeDto dto = new RecipeDto();
     dto.setDishId(1L);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
-    when(recipeRepository.save(any()))
-        .thenReturn(recipe);
+    when(recipeRepository.save(any())).thenReturn(recipe);
 
     RecipeDto result = service.createRecipe(dto);
 
@@ -112,12 +109,9 @@ class RecipeServiceTest {
     RecipeDto dto = new RecipeDto();
     dto.setDishId(1L);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.createRecipe(dto)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.createRecipe(dto));
   }
 
 
@@ -127,12 +121,12 @@ class RecipeServiceTest {
     CreateRecipeDto request = new CreateRecipeDto();
     request.setName("R");
     request.setIngredients(List.of(new IngredientDto() {{
-      setProductId(1L);
-      setQuantity(2.0);
-    }}));
+        setProductId(1L);
+        setQuantity(2.0);
+      }
+    }));
 
-    when(productRepository.findById(1L))
-        .thenReturn(Optional.of(product));
+    when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
     service.createRecipeWithIngredients(request);
 
@@ -145,24 +139,22 @@ class RecipeServiceTest {
 
     CreateRecipeDto request = new CreateRecipeDto();
     request.setIngredients(List.of(new IngredientDto() {{
-      setProductId(1L);
-      setQuantity(2.0);
-    }}));
+        setProductId(1L);
+        setQuantity(2.0);
+      }
+    }));
 
-    when(productRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(productRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.createRecipeWithIngredients(request)
-    );
+    assertThrows(ResourceNotFoundException.class,
+        () -> service.createRecipeWithIngredients(request));
   }
 
 
   @Test
   void shouldReturnCachedList() {
 
-    when(recipeCache.getAll())
-        .thenReturn(List.of(new RecipeDto()));
+    when(recipeCache.getAll()).thenReturn(List.of(new RecipeDto()));
 
     List<RecipeDto> result = service.getAll();
 
@@ -190,8 +182,7 @@ class RecipeServiceTest {
 
     Pageable pageable = PageRequest.of(0, 10);
 
-    when(recipeCache.getPage(pageable, 1L))
-        .thenReturn(page);
+    when(recipeCache.getPage(pageable, 1L)).thenReturn(page);
 
     Page<RecipeDto> result = service.getAllPaged(pageable, 1L);
 
@@ -205,8 +196,8 @@ class RecipeServiceTest {
     Pageable pageable = PageRequest.of(0, 10);
 
     when(recipeCache.getPage(pageable, null)).thenReturn(null);
-    when(recipeRepository.findAllPageable(pageable, null))
-        .thenReturn(new PageImpl<>(List.of(recipe)));
+    when(recipeRepository.findAllPageable(pageable, null)).thenReturn(
+        new PageImpl<>(List.of(recipe)));
 
     Page<RecipeDto> result = service.getAllPaged(pageable, null);
 
@@ -218,8 +209,7 @@ class RecipeServiceTest {
   @Test
   void shouldReturnCachedById() {
 
-    when(recipeCache.getById(1L))
-        .thenReturn(new RecipeDto());
+    when(recipeCache.getById(1L)).thenReturn(new RecipeDto());
 
     RecipeDto result = service.getById(1L);
 
@@ -230,8 +220,7 @@ class RecipeServiceTest {
   @Test
   void shouldLoadAndCacheById() {
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
     RecipeDto result = service.getById(1L);
 
@@ -243,12 +232,9 @@ class RecipeServiceTest {
   void shouldThrowWhenNotFoundById() {
 
     when(recipeCache.getById(1L)).thenReturn(null);
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(recipeRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.getById(1L)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.getById(1L));
   }
 
 
@@ -258,14 +244,11 @@ class RecipeServiceTest {
     RecipeDto dto = new RecipeDto();
     dto.setDishId(1L);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
-    when(recipeRepository.save(any()))
-        .thenReturn(recipe);
+    when(recipeRepository.save(any())).thenReturn(recipe);
 
     RecipeDto result = service.updateRecipe(1L, dto);
 
@@ -279,11 +262,9 @@ class RecipeServiceTest {
     RecipeDto dto = new RecipeDto();
     dto.setDishId(null);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(recipeRepository.save(any()))
-        .thenReturn(recipe);
+    when(recipeRepository.save(any())).thenReturn(recipe);
 
     RecipeDto result = service.updateRecipe(1L, dto);
 
@@ -297,15 +278,11 @@ class RecipeServiceTest {
     RecipeDto dto = new RecipeDto();
     dto.setDishId(1L);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.updateRecipe(1L, dto)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.updateRecipe(1L, dto));
   }
 
 
@@ -314,8 +291,7 @@ class RecipeServiceTest {
 
     recipe.setDish(dish);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
     service.deleteRecipe(1L);
 
@@ -326,12 +302,9 @@ class RecipeServiceTest {
   @Test
   void shouldThrowWhenDeleteNotFound() {
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(recipeRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.deleteRecipe(1L)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.deleteRecipe(1L));
   }
 
 
@@ -342,11 +315,9 @@ class RecipeServiceTest {
     dto.setProductId(1L);
     dto.setQuantity(2.0);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(productRepository.findById(1L))
-        .thenReturn(Optional.of(product));
+    when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
     service.addIngredients(1L, List.of(dto));
 
@@ -356,14 +327,11 @@ class RecipeServiceTest {
   @Test
   void shouldThrowWhenRecipeNotFoundInBulk() {
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(recipeRepository.findById(1L)).thenReturn(Optional.empty());
 
     List<RecipeIngredientRequestDto> list = List.of();
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.addIngredients(1L, list)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.addIngredients(1L, list));
   }
 
   @Test
@@ -373,14 +341,11 @@ class RecipeServiceTest {
     dto.setProductId(null);
     dto.setQuantity(2.0);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
     List<RecipeIngredientRequestDto> list = List.of(dto);
 
-    assertThrows(InvalidDataException.class, () ->
-        service.addIngredients(1L, list)
-    );
+    assertThrows(InvalidDataException.class, () -> service.addIngredients(1L, list));
   }
 
   @Test
@@ -390,14 +355,11 @@ class RecipeServiceTest {
     dto.setProductId(1L);
     dto.setQuantity(0.0);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
     List<RecipeIngredientRequestDto> list = List.of(dto);
 
-    assertThrows(InvalidDataException.class, () ->
-        service.addIngredients(1L, list)
-    );
+    assertThrows(InvalidDataException.class, () -> service.addIngredients(1L, list));
   }
 
   @Test
@@ -405,13 +367,12 @@ class RecipeServiceTest {
 
     CreateRecipeDto request = new CreateRecipeDto();
     request.setIngredients(List.of(new IngredientDto() {{
-      setProductId(1L);
-      setQuantity(0.0);
-    }}));
+        setProductId(1L);
+        setQuantity(0.0);
+      }
+    }));
 
-    assertThrows(InvalidDataException.class, () ->
-        service.createRecipeWithIngredients(request)
-    );
+    assertThrows(InvalidDataException.class, () -> service.createRecipeWithIngredients(request));
   }
 
   @Test
@@ -432,8 +393,7 @@ class RecipeServiceTest {
     CreateRecipeDto request = new CreateRecipeDto();
     request.setDishId(1L);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(new Dish()));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(new Dish()));
 
     service.createRecipeWithIngredients(request);
 
@@ -446,12 +406,10 @@ class RecipeServiceTest {
     CreateRecipeDto request = new CreateRecipeDto();
     request.setDishId(1L);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.createRecipeWithIngredients(request)
-    );
+    assertThrows(ResourceNotFoundException.class,
+        () -> service.createRecipeWithIngredients(request));
   }
 
   @Test
@@ -459,13 +417,12 @@ class RecipeServiceTest {
 
     CreateRecipeDto request = new CreateRecipeDto();
     request.setIngredients(List.of(new IngredientDto() {{
-      setProductId(1L);
-      setQuantity(null);
-    }}));
+        setProductId(1L);
+        setQuantity(null);
+      }
+    }));
 
-    assertThrows(InvalidDataException.class, () ->
-        service.createRecipeWithIngredients(request)
-    );
+    assertThrows(InvalidDataException.class, () -> service.createRecipeWithIngredients(request));
   }
 
   @Test
@@ -486,17 +443,13 @@ class RecipeServiceTest {
     dto.setProductId(1L);
     dto.setQuantity(2.0);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(new Recipe()));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(new Recipe()));
 
-    when(productRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(productRepository.findById(1L)).thenReturn(Optional.empty());
 
     List<RecipeIngredientRequestDto> list = List.of(dto);
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.addIngredients(1L, list)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.addIngredients(1L, list));
   }
 
   @Test
@@ -505,15 +458,11 @@ class RecipeServiceTest {
     RecipeDto dto = new RecipeDto();
     dto.setDishId(1L);
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(new Recipe()));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(new Recipe()));
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.updateRecipe(1L, dto)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.updateRecipe(1L, dto));
   }
 
   @Test
@@ -526,8 +475,7 @@ class RecipeServiceTest {
 
     when(recipeRepository.findById(id)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class,
-        () -> service.updateRecipe(id, dto));
+    assertThrows(ResourceNotFoundException.class, () -> service.updateRecipe(id, dto));
   }
 
   @Test
@@ -565,14 +513,13 @@ class RecipeServiceTest {
     dto.setProductId(1L);
     dto.setQuantity(null);
 
-    assertThrows(InvalidDataException.class,
-        () -> invokeToIngredient(recipeNull, dto));
+    assertThrows(InvalidDataException.class, () -> invokeToIngredient(recipeNull, dto));
   }
 
   private Ingredient invokeToIngredient(Recipe recipe, RecipeIngredientRequestDto dto) {
     try {
-      Method method = RecipeService.class
-          .getDeclaredMethod("toIngredient", Recipe.class, RecipeIngredientRequestDto.class);
+      Method method = RecipeService.class.getDeclaredMethod("toIngredient", Recipe.class,
+          RecipeIngredientRequestDto.class);
 
       method.setAccessible(true);
 

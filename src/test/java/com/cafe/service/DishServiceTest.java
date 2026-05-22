@@ -65,11 +65,9 @@ class DishServiceTest {
   @Test
   void shouldCreateWithRecipe() {
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(dishRepository.save(any()))
-        .thenReturn(dish);
+    when(dishRepository.save(any())).thenReturn(dish);
 
     DishDto result = service.create(validDto);
 
@@ -82,8 +80,7 @@ class DishServiceTest {
 
     validDto.setRecipeId(null);
 
-    when(dishRepository.save(any()))
-        .thenReturn(dish);
+    when(dishRepository.save(any())).thenReturn(dish);
 
     DishDto result = service.create(validDto);
 
@@ -94,30 +91,23 @@ class DishServiceTest {
   @Test
   void shouldThrowWhenRecipeNotFoundOnCreate() {
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(recipeRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.create(validDto)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.create(validDto));
   }
 
   @Test
   void shouldThrowWhenPriceInvalidOnCreate() {
     validDto.setPrice(-1.0);
 
-    assertThrows(InvalidDataException.class, () ->
-        service.create(validDto)
-    );
+    assertThrows(InvalidDataException.class, () -> service.create(validDto));
   }
 
   @Test
   void shouldThrowWhenWeightInvalidOnCreate() {
     validDto.setWeight(0.0);
 
-    assertThrows(InvalidDataException.class, () ->
-        service.create(validDto)
-    );
+    assertThrows(InvalidDataException.class, () -> service.create(validDto));
   }
 
   // ---------- GET ----------
@@ -125,8 +115,7 @@ class DishServiceTest {
   @Test
   void shouldGetById() {
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
     DishDto result = service.getById(1L);
 
@@ -136,19 +125,15 @@ class DishServiceTest {
   @Test
   void shouldThrowWhenDishNotFound() {
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.getById(1L)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.getById(1L));
   }
 
   @Test
   void shouldGetAll() {
 
-    when(dishRepository.findAll())
-        .thenReturn(List.of(dish));
+    when(dishRepository.findAll()).thenReturn(List.of(dish));
 
     List<DishDto> result = service.getAll();
 
@@ -162,14 +147,11 @@ class DishServiceTest {
 
     dish.setRecipe(recipe);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(dishRepository.save(any()))
-        .thenReturn(dish);
+    when(dishRepository.save(any())).thenReturn(dish);
 
     DishDto result = service.update(1L, validDto);
 
@@ -183,14 +165,11 @@ class DishServiceTest {
     oldRecipe.setId(2L);
     dish.setRecipe(oldRecipe);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(dishRepository.save(any()))
-        .thenReturn(dish);
+    when(dishRepository.save(any())).thenReturn(dish);
 
     DishDto result = service.update(1L, validDto);
 
@@ -204,11 +183,9 @@ class DishServiceTest {
     dish.setRecipe(recipe);
     validDto.setRecipeId(null);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
-    when(dishRepository.save(any()))
-        .thenReturn(dish);
+    when(dishRepository.save(any())).thenReturn(dish);
 
     DishDto result = service.update(1L, validDto);
 
@@ -219,34 +196,26 @@ class DishServiceTest {
   @Test
   void shouldThrowWhenDishNotFoundOnUpdate() {
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.update(1L, validDto)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.update(1L, validDto));
   }
 
   @Test
   void shouldThrowWhenRecipeNotFoundOnUpdate() {
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
-    when(recipeRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(recipeRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.update(1L, validDto)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.update(1L, validDto));
   }
 
 
   @Test
   void shouldDelete() {
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
     service.delete(1L);
 
@@ -258,31 +227,24 @@ class DishServiceTest {
 
     dish.setRecipe(recipe);
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.of(dish));
+    when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
 
-    assertThrows(ResourceInUseException.class, () ->
-        service.delete(1L)
-    );
+    assertThrows(ResourceInUseException.class, () -> service.delete(1L));
   }
 
   @Test
   void shouldThrowWhenDeleteNotFound() {
 
-    when(dishRepository.findById(1L))
-        .thenReturn(Optional.empty());
+    when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResourceNotFoundException.class, () ->
-        service.delete(1L)
-    );
+    assertThrows(ResourceNotFoundException.class, () -> service.delete(1L));
   }
 
 
   @Test
   void shouldSearchByName() {
 
-    when(dishRepository.findByNameContainingIgnoreCase("dish"))
-        .thenReturn(List.of(dish));
+    when(dishRepository.findByNameContainingIgnoreCase("dish")).thenReturn(List.of(dish));
 
     List<DishDto> result = service.searchByName("dish");
 
@@ -317,13 +279,13 @@ class DishServiceTest {
 
   @Test
   void shouldDoNothingWhenRecipeNullAndOldRecipeNull() {
-    Dish nullRecipeDish = new Dish(); // без рецепта
-
     DishDto dto = new DishDto();
     dto.setName("test");
     dto.setPrice(10.0);
     dto.setWeight(1.0);
     dto.setRecipeId(null);
+
+    Dish nullRecipeDish = new Dish();
 
     when(dishRepository.findById(1L)).thenReturn(Optional.of(nullRecipeDish));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -335,12 +297,13 @@ class DishServiceTest {
 
   @Test
   void shouldPassWhenWeightPositive_update() {
-    Dish dishLocal = new Dish();
 
     DishDto dto = new DishDto();
     dto.setName("test");
     dto.setPrice(10.0);
     dto.setWeight(1.0); // граница
+
+    Dish dishLocal = new Dish();
 
     when(dishRepository.findById(1L)).thenReturn(Optional.of(dishLocal));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -351,13 +314,13 @@ class DishServiceTest {
   @Test
   void shouldCoverNullRecipeIdAndNullOldRecipe() {
 
-    Dish nullRecipeDish = new Dish();
-
     DishDto dto = new DishDto();
     dto.setName("x");
     dto.setPrice(10.0);
     dto.setWeight(1.0);
     dto.setRecipeId(null);
+
+    Dish nullRecipeDish = new Dish();
 
     when(dishRepository.findById(1L)).thenReturn(Optional.of(nullRecipeDish));
     when(dishRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -369,7 +332,6 @@ class DishServiceTest {
 
   @Test
   void shouldCoverNullOldRecipeBranch() {
-    Dish nullRecipeDish = new Dish();
 
     Recipe newRecipe = new Recipe();
     newRecipe.setId(2L);
@@ -379,6 +341,8 @@ class DishServiceTest {
     dto.setPrice(10.0);
     dto.setWeight(1.0);
     dto.setRecipeId(2L);
+
+    Dish nullRecipeDish = new Dish();
 
     when(dishRepository.findById(1L)).thenReturn(Optional.of(nullRecipeDish));
     when(recipeRepository.findById(2L)).thenReturn(Optional.of(newRecipe));
