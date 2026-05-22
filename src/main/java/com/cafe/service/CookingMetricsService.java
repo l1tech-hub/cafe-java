@@ -86,9 +86,6 @@ public class CookingMetricsService {
         .toList();
   }
 
-  /**
-   * По каждому продукту из рецептов: граммы ингредиента на порцию × число приготовлений, сумма в кг.
-   */
   public List<ProductSpentDto> listSpentProductsKilograms() {
     Map<Long, Double> gramsByProductId = new TreeMap<>();
     Map<Long, String> nameByProductId = new HashMap<>();
@@ -118,7 +115,8 @@ public class CookingMetricsService {
             nameByProductId.getOrDefault(e.getKey(), "—"),
             e.getValue() / 1000.0
         ))
-        .sorted(Comparator.comparing(ProductSpentDto::getProductName, String.CASE_INSENSITIVE_ORDER))
+        .sorted(Comparator.comparing(
+            ProductSpentDto::getProductName, String.CASE_INSENSITIVE_ORDER))
         .toList();
   }
 }

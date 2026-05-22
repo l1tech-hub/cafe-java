@@ -14,7 +14,8 @@ public final class BatchSelectionHelper {
 
   public static void sortByOrder(List<Batch> batches, BatchOrder order) {
     Comparator<Batch> cmp = switch (order) {
-      case PRICE_ASC -> Comparator.comparing(Batch::getPrice, Comparator.nullsLast(Double::compareTo));
+      case PRICE_ASC -> Comparator.comparing(
+          Batch::getPrice, Comparator.nullsLast(Double::compareTo));
       case PRICE_DESC -> Comparator.comparing(
           Batch::getPrice, Comparator.nullsLast(Double::compareTo)).reversed();
       case EXPIRY_ASC -> Comparator.comparing(
