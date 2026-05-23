@@ -19,6 +19,8 @@ public class Recipe {
   private Long id;
 
   private String name;
+
+  @Column(columnDefinition = "TEXT")
   private String instructions;
 
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
