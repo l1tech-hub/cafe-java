@@ -24,7 +24,7 @@ public class CorsConfig {
       ) {
 
         registry
-            .addMapping("/api/**")
+            .addMapping("/**")
             .allowedOrigins(
                 allowedOrigins.toArray(new String[0])
             )
